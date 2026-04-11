@@ -1,0 +1,1290 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DiscForge — Multi Disc Builder</title>
+  <meta name="description" content="Add multiple MP3/OGG files and PNG labels to generate a Minecraft music-disc resource-pack scaffold ZIP. Runs locally in your browser." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500,650,800&family=IBM+Plex+Sans:wght@350;450;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#070b0a;
+      --bg2:#0c1310;
+
+      --panel: rgba(255,255,255,.055);
+      --panel2: rgba(255,255,255,.075);
+      --stroke: rgba(255,255,255,.14);
+      --stroke2: rgba(255,255,255,.22);
+
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.68);
+      --faint: rgba(255,255,255,.50);
+
+      --mint:#6cf2cf;
+      --lime:#9dff7a;
+      --amber:#ffd08a;
+      --rose:#ff7ab6;
+
+      --shadow: 0 24px 80px rgba(0,0,0,.55);
+      --shadow2: 0 14px 44px rgba(0,0,0,.45);
+
+      --r-xl: 28px;
+      --r-lg: 20px;
+      --r-md: 14px;
+      --r-sm: 12px;
+
+      --max: 1180px;
+    }
+
+    *{ box-sizing: border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      color:var(--text);
+      font-family:"IBM Plex Sans", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background:
+        radial-gradient(1100px 650px at 18% 8%, rgba(108,242,207,.18), transparent 58%),
+        radial-gradient(900px 650px at 88% 12%, rgba(157,255,122,.16), transparent 58%),
+        radial-gradient(900px 600px at 50% 95%, rgba(255,122,182,.14), transparent 58%),
+        linear-gradient(180deg, var(--bg), var(--bg2));
+      overflow-x:hidden;
+    }
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      opacity:.22;
+      background:
+        linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+      background-size: 18px 18px;
+      mask-image: radial-gradient(circle at 50% 30%, rgba(0,0,0,.95), rgba(0,0,0,.25) 55%, transparent 78%);
+    }
+
+    .wrap{ width:min(var(--max), calc(100% - 40px)); margin:0 auto; }
+    a{ color: inherit; }
+
+    header{
+      position:sticky; top:0; z-index:30;
+      backdrop-filter: blur(10px);
+      background: linear-gradient(180deg, rgba(7,11,10,.80), rgba(7,11,10,.25));
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .nav{
+      display:flex; align-items:center; justify-content:space-between; gap:16px;
+      padding: 14px 0;
+    }
+    .brand{
+      display:flex; align-items:center; gap:12px;
+      text-decoration:none;
+    }
+    .brandMark{
+      width:42px; height:42px; border-radius:12px;
+      background:
+        radial-gradient(circle at 30% 25%, rgba(157,255,122,.65), transparent 55%),
+        radial-gradient(circle at 75% 75%, rgba(108,242,207,.55), transparent 52%),
+        linear-gradient(145deg, rgba(255,255,255,.12), rgba(255,255,255,.03));
+      border: 1px solid rgba(255,255,255,.16);
+      box-shadow: 0 18px 40px rgba(0,0,0,.35);
+      position:relative; overflow:hidden;
+    }
+    .brandMark::after{
+      content:"";
+      position:absolute; inset:-20%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
+      transform: rotate(18deg) translateX(-40%);
+      animation: sheen 6.5s linear infinite;
+      opacity:.55;
+    }
+    @keyframes sheen{ 0%{transform:rotate(18deg) translateX(-55%);} 100%{transform:rotate(18deg) translateX(55%);} }
+    .brandText{ display:flex; flex-direction:column; line-height:1.0; }
+    .brandText strong{ font-family:"Fraunces",serif; font-weight:800; letter-spacing:.2px; font-size:18px; }
+    .brandText span{ color:var(--muted); font-size:12px; letter-spacing:.18em; text-transform:uppercase; margin-top:4px; }
+
+    .navActions{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
+    .pill{
+      display:inline-flex; align-items:center; gap:10px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.05);
+      color: var(--muted);
+      font-size: 13px;
+      text-decoration:none;
+      transition: transform .15s ease, border-color .15s ease, background .15s ease;
+      user-select:none;
+    }
+    .pill:hover{ transform: translateY(-1px); border-color: rgba(255,255,255,.22); background: rgba(255,255,255,.07); color: rgba(255,255,255,.78); }
+
+    main{ padding: 28px 0 60px; }
+
+    .hero{
+      display:grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 22px;
+      align-items:start;
+      margin-top: 22px;
+    }
+    @media (max-width: 980px){ .hero{ grid-template-columns: 1fr; } }
+
+    .headline{
+      padding: 28px;
+      border-radius: var(--r-xl);
+      border: 1px solid rgba(255,255,255,.12);
+      background:
+        radial-gradient(900px 380px at 15% 18%, rgba(157,255,122,.14), transparent 55%),
+        radial-gradient(700px 420px at 95% 30%, rgba(108,242,207,.13), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      box-shadow: var(--shadow);
+      position:relative; overflow:hidden;
+    }
+    .headline::before{
+      content:"";
+      position:absolute; inset:-2px;
+      border-radius: inherit;
+      background: linear-gradient(120deg, rgba(157,255,122,.18), transparent 35%, rgba(108,242,207,.12), transparent 70%, rgba(255,122,182,.12));
+      opacity:.45; filter: blur(18px);
+      pointer-events:none;
+    }
+    .headline > *{ position:relative; z-index:1; }
+
+    h1{
+      margin:0;
+      font-family:"Fraunces",serif;
+      font-weight:800;
+      letter-spacing:-0.015em;
+      font-size: clamp(34px, 4.4vw, 58px);
+      line-height:1.02;
+    }
+    .lede{
+      margin: 14px 0 0;
+      font-size: clamp(15px, 1.35vw, 18px);
+      line-height:1.55;
+      color: rgba(255,255,255,.76);
+      max-width: 62ch;
+    }
+
+    .callouts{ display:flex; gap:10px; flex-wrap:wrap; margin-top:18px; }
+    .tag{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color: rgba(255,255,255,.76);
+      font-size: 12.5px;
+      letter-spacing:.02em;
+    }
+    .tag .dot{ width:8px; height:8px; border-radius:99px; background: var(--mint); box-shadow: 0 0 0 5px rgba(108,242,207,.12); }
+
+    .panel{
+      border-radius: var(--r-xl);
+      border: 1px solid rgba(255,255,255,.12);
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+    }
+    .panelHeader{
+      padding: 18px 18px 14px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      display:flex; align-items:baseline; justify-content:space-between; gap:14px;
+      background: rgba(0,0,0,.18);
+    }
+    .panelHeader h2{ margin:0; font-family:"Fraunces",serif; font-size:18px; letter-spacing:.01em; }
+    .panelHeader p{ margin:0; color:var(--muted); font-size:13px; }
+
+    .panelBody{ padding:18px; }
+
+    label{
+      display:block;
+      font-size: 12px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color: rgba(255,255,255,.70);
+      margin-bottom:8px;
+    }
+    .field{
+      border-radius: var(--r-md);
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.04);
+      padding: 12px 12px;
+      transition: border-color .15s ease, transform .15s ease, background .15s ease;
+    }
+    .field:focus-within{
+      border-color: rgba(157,255,122,.35);
+      background: rgba(157,255,122,.05);
+      transform: translateY(-1px);
+    }
+    input[type="text"], select{
+      width:100%;
+      font: inherit;
+      color: rgba(255,255,255,.90);
+      background: transparent;
+      border:0; outline:0;
+      padding:2px 0;
+    }
+    input::placeholder{ color: rgba(255,255,255,.40); }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 560px){ .grid{ grid-template-columns:1fr; } }
+
+    .fileZone{
+      margin-top: 14px;
+      border-radius: var(--r-lg);
+      border: 1px dashed rgba(255,255,255,.22);
+      background:
+        radial-gradient(700px 260px at 20% 10%, rgba(255,208,138,.08), transparent 55%),
+        radial-gradient(700px 260px at 90% 70%, rgba(108,242,207,.08), transparent 55%),
+        rgba(255,255,255,.03);
+      padding: 14px;
+      display:grid;
+      gap: 10px;
+      transition: border-color .15s ease, background .15s ease, transform .15s ease;
+    }
+    .fileZone.drag{
+      border-color: rgba(108,242,207,.55);
+      background:
+        radial-gradient(700px 260px at 20% 10%, rgba(108,242,207,.12), transparent 55%),
+        radial-gradient(700px 260px at 90% 70%, rgba(157,255,122,.10), transparent 55%),
+        rgba(255,255,255,.04);
+      transform: translateY(-1px);
+    }
+    .fileRow{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+    .fileRow strong{ font-size:14px; letter-spacing:.01em; }
+    .fileRow small{ color:var(--muted); display:block; margin-top:2px; font-size:12px; }
+
+    .btnRow{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top: 14px; }
+    .btn{
+      appearance:none;
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 999px;
+      padding: 11px 14px;
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.86);
+      font-weight:600;
+      letter-spacing:.01em;
+      cursor:pointer;
+      transition: transform .15s ease, background .15s ease, border-color .15s ease, box-shadow .15s ease;
+      display:inline-flex; align-items:center; gap:10px;
+      user-select:none;
+    }
+    .btn:hover{
+      transform: translateY(-1px);
+      background: rgba(255,255,255,.09);
+      border-color: rgba(255,255,255,.22);
+      box-shadow: 0 14px 36px rgba(0,0,0,.35);
+    }
+    .btn:active{ transform: translateY(0px) scale(.99); }
+    .btn.primary{
+      border-color: rgba(157,255,122,.26);
+      background: linear-gradient(180deg, rgba(157,255,122,.18), rgba(157,255,122,.08));
+      box-shadow: 0 18px 55px rgba(157,255,122,.10);
+    }
+    .btn.primary:hover{
+      border-color: rgba(157,255,122,.40);
+      background: linear-gradient(180deg, rgba(157,255,122,.26), rgba(157,255,122,.10));
+      box-shadow: 0 22px 70px rgba(157,255,122,.14);
+    }
+    .btn.danger{
+      border-color: rgba(255,122,182,.22);
+      background: linear-gradient(180deg, rgba(255,122,182,.16), rgba(255,122,182,.06));
+    }
+    .btn.ghost{ background: transparent; }
+    .btn:disabled{ opacity:.55; cursor:not-allowed; transform:none; box-shadow:none; }
+
+    .hint{
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height:1.45;
+      margin: 10px 0 0;
+    }
+
+    .meter{
+      display:flex; gap:8px; align-items:center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .bar{
+      width: 170px; height: 10px;
+      border-radius:999px;
+      background: rgba(255,255,255,.10);
+      overflow:hidden;
+      border: 1px solid rgba(255,255,255,.14);
+    }
+    .bar > i{
+      display:block; height:100%; width:0%;
+      background: linear-gradient(90deg, rgba(108,242,207,.9), rgba(157,255,122,.9), rgba(255,208,138,.9));
+      border-radius:999px;
+      transition: width .25s ease;
+    }
+
+    .status{
+      padding: 12px;
+      border-radius: var(--r-lg);
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      color: rgba(255,255,255,.78);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    /* Disc list (gallery is allowed: it's a list/gallery) */
+    .listHeader{
+      display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+      margin-top: 14px;
+    }
+    .discList{
+      margin-top: 12px;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .discItem{
+      border-radius: var(--r-xl);
+      border: 1px solid rgba(255,255,255,.12);
+      background:
+        radial-gradient(900px 340px at 15% 10%, rgba(255,208,138,.07), transparent 55%),
+        radial-gradient(700px 360px at 95% 80%, rgba(108,242,207,.08), transparent 55%),
+        rgba(255,255,255,.03);
+      overflow:hidden;
+    }
+    .discItemTop{
+      display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+      padding: 14px 14px 0;
+    }
+    .discItemTop .left{
+      display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+    }
+    .chip{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color: rgba(255,255,255,.76);
+      font-size: 12px;
+    }
+    .chip code{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12px;
+      color: rgba(255,255,255,.88);
+    }
+    .discItemBody{
+      display:grid;
+      grid-template-columns: 220px 1fr;
+      gap: 14px;
+      padding: 14px;
+      align-items:start;
+    }
+    @media (max-width: 740px){
+      .discItemBody{ grid-template-columns: 1fr; }
+    }
+
+    .thumb{
+      border-radius: var(--r-lg);
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      overflow:hidden;
+      min-height: 160px;
+      position: relative;
+      display:grid;
+      place-items:center;
+    }
+    .thumb canvas{ width:100%; height:100%; display:block; }
+    .thumb .fallback{
+      padding: 12px;
+      text-align:center;
+      font-size: 12px;
+      color: rgba(255,255,255,.70);
+      letter-spacing:.12em;
+      text-transform: uppercase;
+      line-height: 1.4;
+    }
+
+    .discForm{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      align-items:start;
+    }
+    @media (max-width: 740px){
+      .discForm{ grid-template-columns: 1fr; }
+    }
+    .rowFull{ grid-column: 1 / -1; }
+
+    audio{ width: 100%; filter: contrast(1.05) saturate(1.1); }
+
+    footer{
+      padding: 26px 0 40px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .foot{
+      display:flex; justify-content:space-between; gap:18px; flex-wrap:wrap;
+      border-top: 1px solid rgba(255,255,255,.10);
+      padding-top: 18px;
+    }
+
+    .reveal{ opacity:0; transform: translateY(10px); }
+    .reveal.in{ opacity:1; transform: translateY(0); transition: opacity .6s ease, transform .6s ease; }
+
+    .srOnly{
+      position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="#top" aria-label="DiscForge home">
+      <div class="brandMark" aria-hidden="true"></div>
+      <div class="brandText">
+        <strong>DiscForge</strong>
+        <span>multi disc builder</span>
+      </div>
+    </a>
+
+    <div class="navActions">
+      <a class="pill" href="#builder">Builder</a>
+      <a class="pill" href="#discs">Discs</a>
+      <button class="pill" id="themeBtn" type="button" title="Toggle contrast mode">Contrast</button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+  <div class="wrap hero">
+    <section class="headline reveal">
+      <h1>Batch-build Minecraft music discs.</h1>
+      <p class="lede">
+        Add <strong>multiple</strong> audio tracks and (optionally) multiple PNG labels.
+        This generates a single ZIP with a <code>sounds.json</code> containing all entries, plus your files in the right folders.
+      </p>
+      <div class="callouts" aria-label="Key features">
+        <span class="tag"><span class="dot"></span>Drop many files</span>
+        <span class="tag"><span class="dot" style="background:var(--lime)"></span>Auto IDs from filenames</span>
+        <span class="tag"><span class="dot" style="background:var(--amber)"></span>Match PNG by name</span>
+        <span class="tag"><span class="dot" style="background:var(--rose)"></span>ZIP (no uploads)</span>
+      </div>
+      <p class="hint" style="margin-top:16px">
+        Note: This creates the resource-pack side (sound events + assets). To create brand-new disc items, you still need mod code for Fabric/Forge/NeoForge.
+      </p>
+    </section>
+
+    <section class="panel reveal" id="builder" aria-label="Builder panel">
+      <div class="panelHeader">
+        <div>
+          <h2>Pack Settings</h2>
+          <p>Global settings for the ZIP</p>
+        </div>
+        <div class="pill" style="pointer-events:none;">Local ZIP</div>
+      </div>
+
+      <div class="panelBody">
+        <div class="grid">
+          <div>
+            <label for="modName">Pack Name</label>
+            <div class="field"><input id="modName" type="text" value="My Mixtape Discs" /></div>
+          </div>
+          <div>
+            <label for="modId">modid (namespace)</label>
+            <div class="field"><input id="modId" type="text" value="mixtape" /></div>
+          </div>
+          <div>
+            <label for="packFormat">pack_format</label>
+            <div class="field">
+              <select id="packFormat">
+                <option value="34">1.20.5–1.20.6 (34)</option>
+                <option value="32">1.20.2–1.20.4 (32)</option>
+                <option value="15" selected>1.20–1.20.1 (15)</option>
+                <option value="12">1.19.3–1.19.4 (12)</option>
+                <option value="9">1.19–1.19.2 (9)</option>
+                <option value="8">1.18.2 (8)</option>
+                <option value="7">1.18–1.18.1 (7)</option>
+                <option value="6">1.17 (6)</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label for="matchMode">PNG matching</label>
+            <div class="field">
+              <select id="matchMode">
+                <option value="basename" selected>Match by filename (recommended)</option>
+                <option value="index">Match by order (1st audio ↔ 1st PNG)</option>
+                <option value="none">Don't attach textures</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="fileZone" id="dropZone" role="group" aria-label="Drop files">
+          <div class="fileRow">
+            <div>
+              <strong>Audio files (MP3/OGG/WAV)</strong>
+              <small id="audioMeta">Drop multiple audio files or choose them</small>
+            </div>
+            <div>
+              <input class="srOnly" id="audioFile" type="file" accept="audio/mpeg,audio/ogg,audio/wav" multiple />
+              <button class="btn ghost" type="button" id="pickAudioBtn">Pick audio</button>
+            </div>
+          </div>
+
+          <div class="fileRow">
+            <div>
+              <strong>PNG textures (optional)</strong>
+              <small id="pngMeta">Drop multiple PNGs or choose them</small>
+            </div>
+            <div>
+              <input class="srOnly" id="pngFile" type="file" accept="image/png" multiple />
+              <button class="btn ghost" type="button" id="pickPngBtn">Pick PNGs</button>
+            </div>
+          </div>
+
+          <p class="hint" style="margin:0">
+            Tip: Minecraft prefers <code>.ogg</code> for disc audio. If you provide MP3/WAV, it will be included as-is and the README will tell you to convert.
+          </p>
+        </div>
+
+        <div class="listHeader">
+          <div class="meter" aria-label="Build readiness">
+            <span>Readiness</span>
+            <span class="bar" aria-hidden="true"><i id="readyFill"></i></span>
+            <span id="readyText">0%</span>
+          </div>
+
+          <div class="btnRow" style="margin:0">
+            <button class="btn primary" id="buildBtn" type="button">Build ZIP</button>
+            <button class="btn" id="clearBtn" type="button">Clear files</button>
+          </div>
+        </div>
+
+        <div class="status" id="statusLine" aria-live="polite" style="margin-top:12px">
+          Add audio files to create disc entries. PNGs are optional.
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="wrap" style="margin-top:22px">
+    <section class="panel reveal" id="discs" aria-label="Disc entries">
+      <div class="panelHeader">
+        <div>
+          <h2>Disc Entries</h2>
+          <p>Per-track disc IDs + previews</p>
+        </div>
+        <div class="pill" style="pointer-events:none;"><span id="discCount">0</span> discs</div>
+      </div>
+      <div class="panelBody">
+        <div class="discList" id="discList"></div>
+        <p class="hint" id="emptyHint" style="display:none">
+          No discs yet. Add audio files above to populate this list.
+        </p>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <div>
+      <div style="font-family:Fraunces,serif; font-weight:650; color:rgba(255,255,255,.82)">DiscForge</div>
+      <div style="margin-top:6px">Batch resource-pack scaffolding for custom disc audio + optional textures.</div>
+    </div>
+    <div style="max-width: 62ch">
+      <div style="color:rgba(255,255,255,.78); font-weight:600">Local-only</div>
+      <div style="margin-top:6px">Everything stays in your browser memory. No uploads.</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // ---------- Helpers ----------
+  const $ = (sel, root=document) => root.querySelector(sel);
+
+  function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
+
+  function encodeUTF8(str){ return new TextEncoder().encode(str); }
+
+  function escapeJsonString(s){
+    return (s || "").replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  }
+
+  function formatBytes(bytes){
+    const units = ["B","KB","MB","GB"];
+    let i = 0, n = bytes;
+    while (n >= 1024 && i < units.length-1){ n /= 1024; i++; }
+    return `${n.toFixed(n >= 10 || i === 0 ? 0 : 1)} ${units[i]}`;
+  }
+
+  function sanitizeModId(input){
+    return (input || "")
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "_")
+      .replace(/[^a-z0-9._-]/g, "")
+      .slice(0, 48) || "examplemod";
+  }
+
+  function sanitizeDiscId(input){
+    return (input || "")
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "_")
+      .replace(/[^a-z0-9/_-]/g, "")
+      .replace(/^\/+|\/+$/g, "")
+      .slice(0, 64) || "custom_disc";
+  }
+
+  function baseName(filename){
+    const dot = filename.lastIndexOf(".");
+    return (dot > 0 ? filename.slice(0, dot) : filename).trim();
+  }
+
+  function ext(filename){
+    const dot = filename.lastIndexOf(".");
+    return (dot > -1 ? filename.slice(dot+1).toLowerCase() : "");
+  }
+
+  function niceDefaultDiscId(fileName){
+    // turn "My Track (Remix).mp3" -> "my_track_remix"
+    return sanitizeDiscId(
+      baseName(fileName)
+        .replace(/[$$$$$$$$\{\}]/g, " ")
+        .replace(/[^\w\s-]/g, " ")
+        .replace(/\s+/g, " ")
+    ).replace(/\s+/g, "_");
+  }
+
+  // ---------- ZIP (store) ----------
+  const CRC_TABLE = (() => {
+    let c, table = new Uint32Array(256);
+    for (let n = 0; n < 256; n++){
+      c = n;
+      for (let k = 0; k < 8; k++){
+        c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+      }
+      table[n] = c >>> 0;
+    }
+    return table;
+  })();
+
+  function crc32(buf){
+    let crc = 0xFFFFFFFF;
+    for (let i = 0; i < buf.length; i++){
+      crc = CRC_TABLE[(crc ^ buf[i]) & 0xFF] ^ (crc >>> 8);
+    }
+    return (crc ^ 0xFFFFFFFF) >>> 0;
+  }
+
+  function u16(n){ return [n & 255, (n >>> 8) & 255]; }
+  function u32(n){ return [n & 255, (n >>> 8) & 255, (n >>> 16) & 255, (n >>> 24) & 255]; }
+
+  function zipStore(files){
+    let localParts = [];
+    let centralParts = [];
+    let offset = 0;
+
+    const now = new Date();
+    const dosTime = ((now.getHours() & 31) << 11) | ((now.getMinutes() & 63) << 5) | ((Math.floor(now.getSeconds()/2)) & 31);
+    const dosDate = (((now.getFullYear() - 1980) & 127) << 9) | (((now.getMonth()+1) & 15) << 5) | ((now.getDate() & 31));
+
+    for (const f of files){
+      const nameBytes = encodeUTF8(f.name);
+      const data = f.data;
+      const c = crc32(data);
+      const size = data.length;
+
+      const localHeader = [
+        ...u32(0x04034b50),
+        ...u16(20),
+        ...u16(0),
+        ...u16(0),
+        ...u16(dosTime),
+        ...u16(dosDate),
+        ...u32(c),
+        ...u32(size),
+        ...u32(size),
+        ...u16(nameBytes.length),
+        ...u16(0)
+      ];
+
+      localParts.push(new Uint8Array(localHeader));
+      localParts.push(nameBytes);
+      localParts.push(data);
+
+      const centralHeader = [
+        ...u32(0x02014b50),
+        ...u16(0x031E),
+        ...u16(20),
+        ...u16(0),
+        ...u16(0),
+        ...u16(dosTime),
+        ...u16(dosDate),
+        ...u32(c),
+        ...u32(size),
+        ...u32(size),
+        ...u16(nameBytes.length),
+        ...u16(0),
+        ...u16(0),
+        ...u16(0),
+        ...u16(0),
+        ...u32(0),
+        ...u32(offset)
+      ];
+
+      centralParts.push(new Uint8Array(centralHeader));
+      centralParts.push(nameBytes);
+
+      offset += localHeader.length + nameBytes.length + size;
+    }
+
+    const centralStart = offset;
+    let centralSize = 0;
+    for (const part of centralParts) centralSize += part.length;
+    offset += centralSize;
+
+    const eocd = new Uint8Array([
+      ...u32(0x06054b50),
+      ...u16(0), ...u16(0),
+      ...u16(files.length), ...u16(files.length),
+      ...u32(centralSize),
+      ...u32(centralStart),
+      ...u16(0)
+    ]);
+
+    const outLen = localParts.reduce((a,p)=>a+p.length,0) + centralSize + eocd.length;
+    const out = new Uint8Array(outLen);
+    let p = 0;
+    for (const part of localParts){ out.set(part, p); p += part.length; }
+    for (const part of centralParts){ out.set(part, p); p += part.length; }
+    out.set(eocd, p);
+    return out;
+  }
+
+  function downloadBytes(bytes, filename, mime="application/zip"){
+    const blob = new Blob([bytes], {type: mime});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 0);
+  }
+
+  // ---------- State ----------
+  const state = {
+    audios: [], // {id, file, url, discId}
+    pngs: [],   // {keyBase, file, url}
+    // for cleanup
+    urls: new Set()
+  };
+
+  // ---------- Elements ----------
+  const modNameEl = $("#modName");
+  const modIdEl = $("#modId");
+  const packFormatEl = $("#packFormat");
+  const matchModeEl = $("#matchMode");
+
+  const dropZone = $("#dropZone");
+  const audioFileEl = $("#audioFile");
+  const pngFileEl = $("#pngFile");
+  const pickAudioBtn = $("#pickAudioBtn");
+  const pickPngBtn = $("#pickPngBtn");
+
+  const audioMeta = $("#audioMeta");
+  const pngMeta = $("#pngMeta");
+  const readyFill = $("#readyFill");
+  const readyText = $("#readyText");
+  const buildBtn = $("#buildBtn");
+  const clearBtn = $("#clearBtn");
+  const statusLine = $("#statusLine");
+
+  const discList = $("#discList");
+  const discCount = $("#discCount");
+  const emptyHint = $("#emptyHint");
+  const themeBtn = $("#themeBtn");
+
+  // ---------- UI ----------
+  function setStatus(msg){ statusLine.textContent = msg; }
+
+  function setReadiness(){
+    const hasAudio = state.audios.length > 0;
+    const hasAnyPng = state.pngs.length > 0;
+
+    // readiness: audio is required, png optional
+    let r = 0;
+    if (hasAudio) r += 85;
+    if (hasAnyPng) r += 15;
+    r = clamp(r, 0, 100);
+
+    readyFill.style.width = r + "%";
+    readyText.textContent = r + "%";
+    buildBtn.disabled = !hasAudio;
+
+    discCount.textContent = String(state.audios.length);
+    emptyHint.style.display = state.audios.length ? "none" : "block";
+  }
+
+  function updateMetaLines(){
+    if (state.audios.length){
+      const total = state.audios.reduce((sum,a)=>sum + a.file.size, 0);
+      audioMeta.textContent = `${state.audios.length} audio file(s) • ${formatBytes(total)}`;
+    } else {
+      audioMeta.textContent = "Drop multiple audio files or choose them";
+    }
+
+    if (state.pngs.length){
+      const total = state.pngs.reduce((sum,p)=>sum + p.file.size, 0);
+      pngMeta.textContent = `${state.pngs.length} PNG(s) • ${formatBytes(total)}`;
+    } else {
+      pngMeta.textContent = "Drop multiple PNGs or choose them";
+    }
+  }
+
+  function makeUrl(file){
+    const url = URL.createObjectURL(file);
+    state.urls.add(url);
+    return url;
+  }
+
+  function revokeAllUrls(){
+    for (const u of state.urls) URL.revokeObjectURL(u);
+    state.urls.clear();
+  }
+
+  function getPngForAudio(audioIdx){
+    const mode = matchModeEl.value;
+    if (mode === "none") return null;
+
+    if (mode === "index"){
+      return state.pngs[audioIdx] || null;
+    }
+
+    // basename matching
+    const a = state.audios[audioIdx];
+    const key = baseName(a.file.name).toLowerCase();
+    // exact match
+    const exact = state.pngs.find(p => p.keyBase === key);
+    if (exact) return exact;
+
+    // fallback: match by sanitized discId
+    const discKey = sanitizeDiscId(a.discId).toLowerCase();
+    const byDisc = state.pngs.find(p => sanitizeDiscId(p.keyBase) === discKey);
+    if (byDisc) return byDisc;
+
+    return null;
+  }
+
+  function drawThumbToCanvas(canvas, pngUrl){
+    const ctx = canvas.getContext("2d");
+    const img = new Image();
+    img.onload = () => {
+      const cw = canvas.width, ch = canvas.height;
+      ctx.clearRect(0,0,cw,ch);
+
+      // background plate
+      ctx.fillStyle = "rgba(0,0,0,0.18)";
+      ctx.fillRect(0,0,cw,ch);
+
+      // cover-fit
+      const ir = img.width / img.height;
+      const cr = cw / ch;
+      let sx=0, sy=0, sw=img.width, sh=img.height;
+      if (ir > cr){
+        sh = img.height;
+        sw = sh * cr;
+        sx = (img.width - sw)/2;
+      } else {
+        sw = img.width;
+        sh = sw / cr;
+        sy = (img.height - sh)/2;
+      }
+      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, cw, ch);
+
+      // subtle scan lines
+      ctx.globalAlpha = 0.18;
+      ctx.fillStyle = "#ffffff";
+      for (let y=0; y<ch; y+=8) ctx.fillRect(0,y,cw,1);
+      ctx.globalAlpha = 1;
+    };
+    img.src = pngUrl;
+  }
+
+  function renderDiscs(){
+    discList.innerHTML = "";
+
+    const modid = sanitizeModId(modIdEl.value);
+
+    state.audios.forEach((a, idx) => {
+      const png = getPngForAudio(idx);
+      const discIdLeaf = sanitizeDiscId(a.discId).split("/").pop();
+      const soundKey = `${modid}:music_disc.${discIdLeaf}`;
+
+      const item = document.createElement("article");
+      item.className = "discItem";
+      item.innerHTML = `
+        <div class="discItemTop">
+          <div class="left">
+            <span class="chip"><span class="dot" style="background: var(--amber); width:8px; height:8px; border-radius:99px;"></span>
+              <code>${soundKey}</code>
+            </span>
+            <span class="chip" title="Original file">${a.file.name}</span>
+          </div>
+          <div class="right">
+            <button class="btn danger" type="button" data-action="remove" data-id="${a.id}">Remove</button>
+          </div>
+        </div>
+
+        <div class="discItemBody">
+          <div class="thumb" aria-label="PNG preview">
+            <canvas width="520" height="360" data-role="thumb"></canvas>
+            <div class="fallback" data-role="fallback" style="display:none">No PNG matched</div>
+          </div>
+
+          <div class="discForm">
+            <div>
+              <label>Disc ID</label>
+              <div class="field">
+                <input type="text" data-action="discId" data-id="${a.id}" value="${a.discId.replace(/"/g,'&quot;')}" />
+              </div>
+              <p class="hint" style="margin-top:8px">Used for file paths + key suffix. Keep it lowercase/underscore.</p>
+            </div>
+
+            <div>
+              <label>Matched PNG</label>
+              <div class="field">
+                <input type="text" value="${png ? png.file.name : "(none)"}" readonly />
+              </div>
+              <p class="hint" style="margin-top:8px">Matching mode: <strong>${matchModeEl.options[matchModeEl.selectedIndex].text}</strong></p>
+            </div>
+
+            <div class="rowFull">
+              <label>Audio Preview</label>
+              <audio controls preload="none" src="${a.url}"></audio>
+              <p class="hint" style="margin-top:8px">
+                Included extension: <code>.${ext(a.file.name) || "ogg"}</code>.
+                Minecraft recommends <code>.ogg</code>.
+              </p>
+            </div>
+          </div>
+        </div>
+      `;
+
+      discList.appendChild(item);
+
+      const canvas = item.querySelector('canvas[data-role="thumb"]');
+      const fallback = item.querySelector('[data-role="fallback"]');
+      if (png){
+        fallback.style.display = "none";
+        drawThumbToCanvas(canvas, png.url);
+      } else {
+        // draw a tasteful placeholder
+        const ctx = canvas.getContext("2d");
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle = "rgba(0,0,0,0.18)";
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle = "rgba(255,255,255,0.10)";
+        for (let x=0; x<canvas.width; x+=24){
+          ctx.fillRect(x, 0, 1, canvas.height);
+        }
+        fallback.style.display = "block";
+      }
+    });
+
+    updateMetaLines();
+    setReadiness();
+  }
+
+  function deDupeDiscIds(){
+    // Ensure unique disc IDs by suffixing _2, _3, ...
+    const seen = new Map();
+    for (const a of state.audios){
+      let id = sanitizeDiscId(a.discId).split("/").pop();
+      const base = id;
+      let n = seen.get(base) || 0;
+      if (n > 0){
+        id = `${base}_${n+1}`;
+      }
+      seen.set(base, n+1);
+      a.discId = id;
+    }
+  }
+
+  // ---------- File ingestion ----------
+  function addAudioFiles(fileList){
+    const files = Array.from(fileList || []).filter(f => (f.type || "").startsWith("audio/") || ["mp3","ogg","wav"].includes(ext(f.name)));
+    if (!files.length){
+      setStatus("No audio files found in that selection.");
+      return;
+    }
+
+    let added = 0;
+    for (const f of files){
+      // avoid duplicates by name+size
+      const exists = state.audios.some(a => a.file.name === f.name && a.file.size === f.size);
+      if (exists) continue;
+
+      const id = crypto?.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random());
+      state.audios.push({
+        id,
+        file: f,
+        url: makeUrl(f),
+        discId: niceDefaultDiscId(f.name)
+      });
+      added++;
+    }
+
+    if (added === 0){
+      setStatus("Those audio files were already added.");
+      return;
+    }
+
+    // keep stable order: sort by filename
+    state.audios.sort((a,b) => a.file.name.localeCompare(b.file.name));
+    deDupeDiscIds();
+
+    setStatus(`Added ${added} audio file(s).`);
+    renderDiscs();
+  }
+
+  function addPngFiles(fileList){
+    const files = Array.from(fileList || []).filter(f => f.type === "image/png" || ext(f.name) === "png");
+    if (!files.length){
+      setStatus("No PNG files found in that selection.");
+      return;
+    }
+
+    let added = 0;
+    for (const f of files){
+      const key = baseName(f.name).toLowerCase();
+      const exists = state.pngs.some(p => p.file.name === f.name && p.file.size === f.size);
+      if (exists) continue;
+
+      state.pngs.push({
+        keyBase: key,
+        file: f,
+        url: makeUrl(f)
+      });
+      added++;
+    }
+
+    if (added === 0){
+      setStatus("Those PNGs were already added.");
+      return;
+    }
+
+    // sort by filename
+    state.pngs.sort((a,b) => a.file.name.localeCompare(b.file.name));
+
+    setStatus(`Added ${added} PNG(s).`);
+    renderDiscs();
+  }
+
+  // Drag & drop
+  ["dragenter","dragover"].forEach(evt => {
+    dropZone.addEventListener(evt, (e) => {
+      e.preventDefault(); e.stopPropagation();
+      dropZone.classList.add("drag");
+    });
+  });
+  ["dragleave","drop"].forEach(evt => {
+    dropZone.addEventListener(evt, (e) => {
+      e.preventDefault(); e.stopPropagation();
+      dropZone.classList.remove("drag");
+    });
+  });
+  dropZone.addEventListener("drop", (e) => {
+    const files = Array.from(e.dataTransfer.files || []);
+    // classify
+    addAudioFiles(files);
+    addPngFiles(files);
+  });
+
+  pickAudioBtn.addEventListener("click", () => audioFileEl.click());
+  pickPngBtn.addEventListener("click", () => pngFileEl.click());
+  audioFileEl.addEventListener("change", () => addAudioFiles(audioFileEl.files));
+  pngFileEl.addEventListener("change", () => addPngFiles(pngFileEl.files));
+
+  clearBtn.addEventListener("click", () => {
+    revokeAllUrls();
+    state.audios = [];
+    state.pngs = [];
+    audioFileEl.value = "";
+    pngFileEl.value = "";
+    setStatus("Cleared all files.");
+    renderDiscs();
+  });
+
+  // Per-disc interactions (delegated)
+  discList.addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-action]");
+    if (!btn) return;
+    const action = btn.dataset.action;
+    const id = btn.dataset.id;
+
+    if (action === "remove"){
+      const idx = state.audios.findIndex(a => a.id === id);
+      if (idx > -1){
+        const removed = state.audios[idx];
+        if (removed?.url){ URL.revokeObjectURL(removed.url); state.urls.delete(removed.url); }
+        state.audios.splice(idx, 1);
+        setStatus("Removed disc entry.");
+        renderDiscs();
+      }
+    }
+  });
+
+  discList.addEventListener("input", (e) => {
+    const input = e.target.closest('input[data-action="discId"]');
+    if (!input) return;
+    const id = input.dataset.id;
+    const item = state.audios.find(a => a.id === id);
+    if (!item) return;
+    item.discId = sanitizeDiscId(input.value);
+
+    // keep UI key text updated without full rerender: simplest is rerender (small lists)
+    renderDiscs();
+  });
+
+  // Re-render when global settings that affect matching/keys change
+  modIdEl.addEventListener("input", () => renderDiscs());
+  matchModeEl.addEventListener("change", () => {
+    setStatus("PNG matching updated.");
+    renderDiscs();
+  });
+
+  // Contrast toggle
+  themeBtn.addEventListener("click", () => {
+    const root = document.documentElement;
+    const high = root.dataset.contrast === "high";
+    if (high){
+      delete root.dataset.contrast;
+      root.style.filter = "";
+    } else {
+      root.dataset.contrast = "high";
+      root.style.filter = "contrast(1.08) saturate(1.06)";
+    }
+  });
+
+  // ---------- Build ZIP ----------
+  function buildSoundsJson(modid){
+    // sounds.json keys are WITHOUT namespace (because it's inside assets/<modid>/)
+    // We'll map: "music_disc.<discId>" -> sound path "<modid>:music_disc/<discId>"
+    const obj = {};
+    for (const a of state.audios){
+      const leaf = sanitizeDiscId(a.discId).split("/").pop();
+      obj[`music_disc.${leaf}`] = {
+        sounds: [{ name: `${modid}:music_disc/${leaf}`, stream: true }]
+      };
+    }
+    // Stable JSON formatting
+    return JSON.stringify(obj, null, 2) + "\n";
+  }
+
+  function buildReadme(packName, modid){
+    const lines = [];
+    lines.push("DiscForge — Output Notes");
+    lines.push("");
+    lines.push("What you built:");
+    lines.push("- A resource pack scaffold that defines custom sound events in sounds.json.");
+    lines.push("- Your audio files are placed under assets/<modid>/sounds/music_disc/.");
+    lines.push("- Optional PNGs are placed under assets/<modid>/textures/item/ (if matched).");
+    lines.push("");
+    lines.push("Important:");
+    lines.push("- Minecraft recommends .ogg for music discs.");
+    lines.push("- If you provided MP3/WAV, convert to OGG Vorbis and replace the file(s).");
+    lines.push("");
+    lines.push("Sound event keys (for your mod code):");
+    for (const a of state.audios){
+      const leaf = sanitizeDiscId(a.discId).split("/").pop();
+      lines.push(`- ${modid}:music_disc.${leaf}`);
+    }
+    lines.push("");
+    lines.push("To create NEW music disc items:");
+    lines.push("- Fabric/Forge/NeoForge: register a MusicDiscItem and link it to the sound event above.");
+    lines.push("- Add item model + texture as needed (not generated beyond saving your PNG).");
+    lines.push("");
+    lines.push(`Pack name: ${packName}`);
+    lines.push("Generated locally in your browser.");
+    return lines.join("\n") + "\n";
+  }
+
+  buildBtn.addEventListener("click", async () => {
+    if (!state.audios.length){
+      setStatus("Add at least one audio file first.");
+      return;
+    }
+
+    const packName = (modNameEl.value || "My Disc Pack").trim().slice(0, 64);
+    const modid = sanitizeModId(modIdEl.value);
+    const packFormat = parseInt(packFormatEl.value, 10) || 15;
+
+    // Build files list
+    const files = [];
+    const packMcmeta = `{
+  "pack": {
+    "pack_format": ${packFormat},
+    "description": "${escapeJsonString(packName)} — custom music disc audio"
+  }
+}
+`;
+    files.push({ name: "pack.mcmeta", data: encodeUTF8(packMcmeta) });
+    files.push({ name: `assets/${modid}/sounds.json`, data: encodeUTF8(buildSoundsJson(modid)) });
+    files.push({ name: "README.txt", data: encodeUTF8(buildReadme(packName, modid)) });
+
+    // Add audio + textures
+    let nonOggCount = 0;
+    for (let i=0; i<state.audios.length; i++){
+      const a = state.audios[i];
+      const leaf = sanitizeDiscId(a.discId).split("/").pop();
+      const audioExt = ext(a.file.name) || "ogg";
+      if (audioExt !== "ogg") nonOggCount++;
+
+      const audioPath = `assets/${modid}/sounds/music_disc/${leaf}.${audioExt}`;
+      const audioBuf = new Uint8Array(await a.file.arrayBuffer());
+      files.push({ name: audioPath, data: audioBuf });
+
+      const png = getPngForAudio(i);
+      if (png){
+        const pngBuf = new Uint8Array(await png.file.arrayBuffer());
+        files.push({ name: `assets/${modid}/textures/item/${leaf}.png`, data: pngBuf });
+      }
+    }
+
+    const zipBytes = zipStore(files);
+    const outName = `${modid}_music_discs_pack.zip`;
+    downloadBytes(zipBytes, outName);
+
+    if (nonOggCount){
+      setStatus(`Built ${outName}. Note: ${nonOggCount} audio file(s) are not .ogg — convert for Minecraft compatibility.`);
+    } else {
+      setStatus(`Built ${outName}. All audio files are .ogg — nice.`);
+    }
+  });
+
+  // ---------- Reveal ----------
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries){
+      if (e.isIntersecting){
+        e.target.classList.add("in");
+        io.unobserve(e.target);
+      }
+    }
+  }, { threshold: 0.12 });
+  document.querySelectorAll(".reveal").forEach(el => io.observe(el));
+
+  // Initial render
+  renderDiscs();
+</script>
+</body>
+</html>
