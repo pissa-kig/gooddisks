@@ -337,7 +337,6 @@
       line-height: 1.45;
     }
 
-    /* Disc list (gallery is allowed: it's a list/gallery) */
     .listHeader{
       display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
       margin-top: 14px;
@@ -609,9 +608,6 @@
 
 <script>
   // --- Minimal jsmediatags implementation for APIC extraction ---
-  // Source: https://github.com/aadsm/jsmediatags (MIT License)
-  // We only implement minimal APIC frame parsing here for embedded images.
-
   class ID3Reader {
     constructor(file) {
       this.file = file;
@@ -629,7 +625,6 @@
           }
         };
         this.reader.onerror = () => reject(this.reader.error);
-        // Read first 256KB max (ID3 tags are usually at start)
         const slice = this.file.slice(0, 256 * 1024);
         this.reader.readAsArrayBuffer(slice);
       });
@@ -637,12 +632,10 @@
 
     parseID3(buffer) {
       const data = new DataView(buffer);
-      // Check header "ID3"
       if (data.getUint8(0) !== 0x49 || data.getUint8(1) !== 0x44 || data.getUint8(2) !== 0x33) {
-        return {}; // no ID3 tag
+        return {};
       }
       const version = data.getUint8(3);
-      const flags = data.getUint8(5);
       const size = this.syncSafeInt(data.getUint8(6), data.getUint8(7), data.getUint8(8), data.getUint8(9));
       let offset = 10;
       const tags = {};
@@ -650,7 +643,6 @@
         let frameId = "";
         let frameSize = 0;
         if (version === 3) {
-          // ID3v2.3
           frameId = String.fromCharCode(
             data.getUint8(offset),
             data.getUint8(offset + 1),
@@ -660,7 +652,6 @@
           frameSize = data.getUint32(offset + 4, false);
           offset += 10;
         } else if (version === 4) {
-          // ID3v2.4
           frameId = String.fromCharCode(
             data.getUint8(offset),
             data.getUint8(offset + 1),
@@ -675,11 +666,10 @@
           );
           offset += 10;
         } else {
-          break; // unsupported version
+          break;
         }
         if (!frameId.trim()) break;
         if (frameId === "APIC") {
-          // Parse APIC frame for image
           const frameData = new Uint8Array(buffer, offset, frameSize);
           const image = this.parseAPIC(frameData);
           if (image) tags.picture = image;
@@ -694,22 +684,16 @@
     }
 
     parseAPIC(data) {
-      // APIC format:
-      // [text encoding:1][MIME string][0][picture type:1][description][0][image data]
       let pos = 0;
       const textEncoding = data[pos++];
-      // Read MIME type string until 0
       let mime = "";
       while (pos < data.length && data[pos] !== 0) {
         mime += String.fromCharCode(data[pos++]);
       }
-      pos++; // skip 0
-      if (!mime) mime = "image/jpeg"; // fallback
-      pos++; // skip picture type byte
-      // Read description until 0 (encoding dependent, assume ISO-8859-1)
+      pos++;
+      pos++;
       while (pos < data.length && data[pos] !== 0) pos++;
-      pos++; // skip 0
-      // The rest is image data
+      pos++;
       const imageData = data.slice(pos);
       return { mime, data: imageData };
     }
@@ -937,14 +921,12 @@
       const reader = new ID3Reader(file);
       const tags = await reader.read();
       if (tags.picture && tags.picture.data && tags.picture.mime){
-        // Convert Uint8Array to Blob URL
         const blob = new Blob([tags.picture.data], {type: tags.picture.mime});
         const url = URL.createObjectURL(blob);
         state.urls.add(url);
         return { mime: tags.picture.mime, data: tags.picture.data, url };
       }
     } catch(e){
-      // silently fail
     }
     return null;
   }
@@ -993,14 +975,11 @@
       return state.pngs[audioIdx] || null;
     }
 
-    // basename matching
     const a = state.audios[audioIdx];
     const key = baseName(a.file.name).toLowerCase();
-    // exact match
     const exact = state.pngs.find(p => p.keyBase === key);
     if (exact) return exact;
 
-    // fallback: use embedded image if present
     if (a.embeddedImage) return a.embeddedImage;
 
     return null;
@@ -1152,7 +1131,6 @@
       const id = crypto?.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random());
       const discId = niceDefaultDiscId(f.name);
 
-      // Extract embedded image asynchronously
       let embeddedImage = null;
       if (ext(f.name) === "mp3"){
         embeddedImage = await extractEmbeddedImage(f);
@@ -1372,12 +1350,9 @@
           const pngBuf = new Uint8Array(await png.file.arrayBuffer());
           files.push({ name: `assets/${modid}/textures/item/${leaf}.png`, data: pngBuf });
         } else if (png.data && png.mime){
-          // embedded image: convert Uint8Array to PNG Blob (if not PNG, convert to PNG canvas)
-          // For simplicity, embed as is if PNG mime, else convert to PNG canvas
           if (png.mime === "image/png"){
             files.push({ name: `assets/${modid}/textures/item/${leaf}.png`, data: png.data });
           } else {
-            // Convert to PNG via canvas
             const pngData = await convertImageDataToPng(png.data, png.mime);
             files.push({ name: `assets/${modid}/textures/item/${leaf}.png`, data: pngData });
           }
@@ -1440,8 +1415,6 @@
 
   // Initial render
   renderDiscs();
-
-  // --- ID3Reader class included above ---
 </script>
 </body>
 </html>
