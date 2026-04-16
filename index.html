@@ -702,6 +702,47 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+
+    /* Commands output panel */
+    #commandsPanel {
+      margin-top: 24px;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(103,255,154,.35);
+      background: rgba(13,20,40,.45);
+      padding: 16px;
+      font-family: var(--mono);
+      font-size: 14px;
+      color: var(--lime);
+      max-height: 220px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      user-select: text;
+      display: none;
+      position: relative;
+    }
+    #commandsPanel h3 {
+      margin-top: 0;
+      margin-bottom: 8px;
+      font-weight: 700;
+      color: var(--teal);
+    }
+    #copyCommandsBtn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: var(--lime);
+      border: none;
+      border-radius: 12px;
+      padding: 6px 12px;
+      font-weight: 700;
+      color: var(--bg0);
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    #copyCommandsBtn:hover {
+      background: var(--teal);
+      color: var(--ink);
+    }
   </style>
 </head>
 
@@ -747,7 +788,7 @@
           <p class="lede">
             Drop your audio files (and optional Blockbench models), name your discs, and export a complete mod template:
             items, sounds, lang entries, and the <span style="color:rgba(234,240,255,.92)">jukebox‑playable</span> music disc behavior.
-            Your discs are obtainable with <code style="font-family:var(--mono); color:rgba(103,255,154,.92)">/give</code> and act like vanilla.
+            Your discs are obtainable with <code style="font-family:var(--mono)">/give</code> and act like vanilla.
           </p>
 
           <div class="heroActions">
@@ -980,6 +1021,13 @@
             </form>
           </div>
         </div>
+      </div>
+
+      <!-- New commands output panel -->
+      <div id="commandsPanel" role="region" aria-live="polite" aria-label="Minecraft /give commands for generated discs">
+        <h3>Generated Minecraft /give commands</h3>
+        <button id="copyCommandsBtn" type="button" aria-label="Copy all /give commands">Copy All</button>
+        <pre id="commandsText"></pre>
       </div>
     </section>
 
@@ -1224,6 +1272,10 @@ registerItem(<span class="t">modid</span>:<span class="n">mellow_night</span>,
     const mcVerEl = $("#mcVersion");
     const prefixEl = $("#discPrefix");
 
+    const commandsPanel = $("#commandsPanel");
+    const commandsText = $("#commandsText");
+    const copyCommandsBtn = $("#copyCommandsBtn");
+
     // ---------- Reveal on scroll ----------
     const io = new IntersectionObserver(entries=>{
       for (const e of entries){
@@ -1400,6 +1452,8 @@ registerItem(<span class="t">modid</span>:<span class="n">mellow_night</span>,
       state.bbmodel.clear();
       state.discs = [];
       renderDiscs();
+      commandsPanel.style.display = "none";
+      commandsText.textContent = "";
       logLine(`[clear] Cleared imported files.`, "warn");
     });
 
@@ -1716,6 +1770,21 @@ ${discs.map(d => `    // SOUND_EVENTS.register("music_disc.${d.id}", () -> new S
 
       logLine(`[done] Exported ${filename} (${entries.length} files).`, "ok");
       toast(`Downloaded ${filename}`);
+
+      // Show commands panel with /give commands
+      showCommandsPanel(modid);
+    }
+
+    function showCommandsPanel(modid){
+      if (!state.discs.length) {
+        commandsPanel.style.display = "none";
+        commandsText.textContent = "";
+        return;
+      }
+      const commands = state.discs.map(d => `/give @p ${modid}:${d.id}`).join("\n");
+      commandsText.textContent = commands;
+      commandsPanel.style.display = "block";
+      commandsPanel.scrollTop = 0;
     }
 
     // ---------- Buttons ----------
@@ -1759,6 +1828,12 @@ ${discs.map(d => `    // SOUND_EVENTS.register("music_disc.${d.id}", () -> new S
       const text = state.discs.map(d=>`/give @p ${modid}:${d.id}`).join("\n");
       copyText(text);
       logLine(`[copy] Copied ${state.discs.length} /give commands.`, "ok");
+    });
+
+    copyCommandsBtn.addEventListener("click", ()=>{
+      if (commandsText.textContent.trim().length > 0){
+        copyText(commandsText.textContent);
+      }
     });
 
     $("#exportZip").addEventListener("click", exportZip);
