@@ -245,28 +245,176 @@
       color: var(--muted);
     }
 
-    /* Combined Generator Panel */
-    #generatorPanel {
-      max-width: 900px;
-      margin: 0 auto 40px;
+    /* Hero */
+    main {
+      padding-bottom: 70px;
+    }
+    .hero {
+      padding: clamp(22px, 4.5vw, 54px) 0 18px;
+      position: relative;
+    }
+    .heroGrid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: clamp(18px, 3vw, 30px);
+      align-items: stretch;
+    }
+    @media (max-width: 980px) {
+      .heroGrid {
+        grid-template-columns: 1fr;
+      }
+      .brand {
+        min-width: unset;
+      }
+      .navlinks {
+        display: none;
+      }
+    }
+    .kicker {
       display: flex;
-      flex-direction: column;
-      gap: 20px;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(234, 240, 255, 0.16);
+      background: rgba(13, 20, 40, 0.52);
+      color: var(--muted);
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      font-size: 13px;
+    }
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 45%),
+        linear-gradient(180deg, var(--lime), var(--teal));
+      box-shadow: 0 0 0 3px rgba(103, 255, 154, 0.12);
     }
 
-    /* Dropzone */
+    h1 {
+      margin: 0 0 12px 0;
+      font-family: var(--display);
+      font-weight: 800;
+      line-height: 0.95;
+      letter-spacing: -0.8px;
+      font-size: clamp(40px, 4.5vw, 78px);
+    }
+    .lede {
+      margin: 0 0 18px;
+      color: var(--muted);
+      max-width: 62ch;
+      font-size: clamp(16px, 1.35vw, 18px);
+      line-height: 1.55;
+    }
+    .heroActions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 18px;
+      align-items: center;
+    }
+    .metaRow {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+      color: var(--faint);
+      font-family: var(--mono);
+      font-size: 12px;
+    }
+    .metaRow span {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      padding: 6px 10px;
+      border: 1px dashed rgba(234, 240, 255, 0.14);
+      border-radius: 999px;
+      background: rgba(7, 10, 15, 0.22);
+    }
+    .metaRow i {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(234, 240, 255, 0.34);
+    }
+
+    /* Right panel: “console” */
+    .console {
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(234, 240, 255, 0.16);
+      background: linear-gradient(180deg, rgba(13, 20, 40, 0.78), rgba(11, 18, 38, 0.62));
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+      min-height: 420px;
+    }
+    .consoleTop {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(234, 240, 255, 0.12);
+      background: linear-gradient(180deg, rgba(7, 10, 15, 0.35), rgba(7, 10, 15, 0.12));
+    }
+    .lights {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .lights b {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      display: inline-block;
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.06);
+    }
+    .lights b:nth-child(1) {
+      background: rgba(255, 77, 125, 0.85);
+    }
+    .lights b:nth-child(2) {
+      background: rgba(255, 176, 0, 0.85);
+    }
+    .lights b:nth-child(3) {
+      background: rgba(103, 255, 154, 0.85);
+    }
+    .consoleTitle {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .consoleTitle .chip {
+      border-style: solid;
+      background: rgba(13, 20, 40, 0.55);
+    }
+    .consoleBody {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
     .dropzone {
       border-radius: 18px;
       border: 1px dashed rgba(234, 240, 255, 0.22);
       background: radial-gradient(450px 220px at 25% 30%, rgba(103, 255, 154, 0.1), transparent 60%),
         radial-gradient(450px 220px at 70% 70%, rgba(44, 231, 211, 0.1), transparent 60%), rgba(7, 10, 15, 0.28);
-      padding: 18px 20px;
-      min-height: 160px;
+      padding: 14px;
+      min-height: 150px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
       position: relative;
-      cursor: pointer;
+      overflow: hidden;
       transition: border-color 0.2s var(--ease), transform 0.2s var(--ease), background 0.2s var(--ease);
     }
     .dropzone.isDrag {
@@ -277,8 +425,9 @@
     }
     .dzTop {
       display: flex;
+      align-items: flex-start;
       justify-content: space-between;
-      align-items: center;
+      gap: 12px;
     }
     .dzTop h3 {
       margin: 0;
@@ -291,13 +440,15 @@
     .dzTop p {
       margin: 4px 0 0;
       color: var(--muted);
-      font-size: 14px;
-      max-width: 480px;
+      font-size: 13px;
+      line-height: 1.45;
+      max-width: 44ch;
     }
     .filePills {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
+      margin-top: 6px;
       color: var(--muted);
       font-family: var(--mono);
       font-size: 12px;
@@ -313,7 +464,7 @@
       gap: 10px;
       flex-wrap: wrap;
       align-items: center;
-      margin-top: 6px;
+      margin-top: 2px;
     }
     .btn.small {
       padding: 9px 11px;
@@ -324,59 +475,165 @@
       display: none;
     }
 
-    /* Form */
-    form.form {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 16px;
-    }
-    label {
-      display: block;
-      font-weight: 800;
-      font-size: 13px;
-      color: rgba(234, 240, 255, 0.92);
-      margin-bottom: 8px;
-      letter-spacing: 0.25px;
-    }
-    .field {
-      border-radius: 16px;
-      border: 1px solid rgba(234, 240, 255, 0.14);
-      background: rgba(7, 10, 15, 0.22);
-      padding: 10px 12px;
-      color: var(--ink);
-      width: 100%;
-      outline: none;
-      transition: border-color 0.18s var(--ease), transform 0.18s var(--ease);
-      font-family: var(--body);
-      font-weight: 650;
-    }
-    .field:focus {
-      border-color: rgba(44, 231, 211, 0.45);
-      transform: translateY(-1px);
-    }
-    .hint {
-      margin-top: 8px;
-      color: var(--muted);
+    .log {
+      border-radius: 18px;
+      border: 1px solid rgba(234, 240, 255, 0.12);
+      background: rgba(7, 10, 15, 0.28);
+      padding: 12px 12px;
+      height: 170px;
+      overflow: auto;
+      font-family: var(--mono);
       font-size: 12px;
-      line-height: 1.5;
+      color: rgba(234, 240, 255, 0.88);
+      line-height: 1.45;
+      white-space: pre-wrap;
     }
-    .stack {
-      display: flex;
-      flex-direction: column;
+    .log .muted {
+      color: rgba(167, 179, 218, 0.86);
     }
-    .wide {
-      grid-column: 1 / -1;
+    .log .ok {
+      color: rgba(103, 255, 154, 0.92);
+    }
+    .log .warn {
+      color: rgba(255, 176, 0, 0.92);
+    }
+    .log .err {
+      color: rgba(255, 77, 125, 0.95);
+    }
+    .logLine {
+      margin: 0 0 6px 0;
     }
 
-    /* Disc List */
+    /* Sections */
+    section {
+      padding: clamp(22px, 4vw, 54px) 0;
+    }
+    .sectionHead {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 16px;
+    }
+    .sectionHead h2 {
+      margin: 0;
+      font-family: var(--display);
+      font-weight: 800;
+      letter-spacing: -0.6px;
+      font-size: clamp(26px, 2.5vw, 40px);
+      line-height: 1.02;
+    }
+    .sectionHead p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 60ch;
+      line-height: 1.55;
+    }
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(234, 240, 255, 0.16), transparent);
+      margin: 22px 0 0;
+    }
+
+    /* “No cards” feature blocks: use split rows */
+    .flow {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-top: 14px;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 0.92fr 1.08fr;
+      gap: 16px;
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(234, 240, 255, 0.12);
+      background: linear-gradient(180deg, rgba(13, 20, 40, 0.55), rgba(11, 18, 38, 0.35));
+      padding: 16px;
+      overflow: hidden;
+      position: relative;
+    }
+    .row:before {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      background: radial-gradient(380px 160px at 18% 18%, rgba(103, 255, 154, 0.1), transparent 65%),
+        radial-gradient(380px 160px at 88% 68%, rgba(169, 139, 255, 0.1), transparent 65%);
+      pointer-events: none;
+      opacity: 0.9;
+    }
+    @media (max-width: 980px) {
+      .row {
+        grid-template-columns: 1fr;
+      }
+    }
+    .row h3 {
+      margin: 0 0 8px 0;
+      font-family: var(--display);
+      letter-spacing: -0.35px;
+      font-weight: 800;
+      font-size: 22px;
+      position: relative;
+    }
+    .row p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+      position: relative;
+    }
+    .rowAside {
+      position: relative;
+      border-radius: 18px;
+      border: 1px solid rgba(234, 240, 255, 0.12);
+      background: radial-gradient(360px 200px at 20% 30%, rgba(44, 231, 211, 0.1), transparent 60%),
+        radial-gradient(360px 200px at 70% 70%, rgba(255, 176, 0, 0.1), transparent 60%), rgba(7, 10, 15, 0.26);
+      padding: 14px;
+      overflow: hidden;
+    }
+    .rowAside .code {
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.55;
+      color: rgba(234, 240, 255, 0.88);
+      white-space: pre-wrap;
+      margin: 0;
+    }
+    .rowAside .code .k {
+      color: rgba(103, 255, 154, 0.92);
+    }
+    .rowAside .code .t {
+      color: rgba(44, 231, 211, 0.92);
+    }
+    .rowAside .code .n {
+      color: rgba(169, 139, 255, 0.95);
+    }
+    .rowAside .code .w {
+      color: rgba(255, 176, 0, 0.92);
+    }
+    .rowAside .code .r {
+      color: rgba(255, 77, 125, 0.92);
+    }
+
+    /* Gallery list (allowed: it’s a list of generated discs) */
+    .gen {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 16px;
+      align-items: start;
+      margin-top: 18px;
+    }
+    @media (max-width: 980px) {
+      .gen {
+        grid-template-columns: 1fr;
+      }
+    }
+
     .panel {
       border-radius: var(--radius-lg);
       border: 1px solid rgba(234, 240, 255, 0.14);
       background: linear-gradient(180deg, rgba(13, 20, 40, 0.62), rgba(11, 18, 38, 0.4));
       box-shadow: 0 16px 50px rgba(0, 0, 0, 0.35);
       overflow: hidden;
-      max-height: 320px;
-      overflow-y: auto;
     }
     .panelHead {
       padding: 14px 16px;
@@ -385,6 +642,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 10px;
+      background: rgba(7, 10, 15, 0.18);
     }
     .panelHead h3 {
       margin: 0;
@@ -394,8 +652,9 @@
       font-size: 20px;
     }
     .panelBody {
-      padding: 12px 16px;
+      padding: 14px 16px;
     }
+
     .list {
       display: flex;
       flex-direction: column;
@@ -481,19 +740,173 @@
       transform: translateY(0) scale(0.98);
     }
 
-    /* Export & Preview Buttons */
-    #exportButtons {
+    /* Settings form */
+    .form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 620px) {
+      .form {
+        grid-template-columns: 1fr;
+      }
+    }
+    label {
+      display: block;
+      font-weight: 800;
+      font-size: 13px;
+      color: rgba(234, 240, 255, 0.92);
+      margin-bottom: 8px;
+      letter-spacing: 0.25px;
+    }
+    .field {
+      border-radius: 16px;
+      border: 1px solid rgba(234, 240, 255, 0.14);
+      background: rgba(7, 10, 15, 0.22);
+      padding: 10px 12px;
+      color: var(--ink);
+      width: 100%;
+      outline: none;
+      transition: border-color 0.18s var(--ease), transform 0.18s var(--ease);
+      font-family: var(--body);
+      font-weight: 650;
+    }
+    .field:focus {
+      border-color: rgba(44, 231, 211, 0.45);
+      transform: translateY(-1px);
+    }
+    .hint {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .stack {
+      display: flex;
+      flex-direction: column;
+    }
+    .wide {
+      grid-column: 1 / -1;
+    }
+    .formActions {
       display: flex;
       gap: 12px;
-      justify-content: flex-end;
-      max-width: 900px;
-      margin: 12px auto 0;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    /* Footer */
+    footer {
+      padding: 24px 0 40px;
+      border-top: 1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(7, 10, 15, 0.18), rgba(7, 10, 15, 0.44));
+    }
+    .foot {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--muted);
+    }
+    .foot .tiny {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--faint);
+    }
+
+    /* Reveal motion */
+    .reveal {
+      opacity: 0;
+      transform: translateY(10px);
+      filter: blur(2px);
+      transition: opacity 0.7s var(--ease), transform 0.7s var(--ease), filter 0.7s var(--ease);
+    }
+    .reveal.in {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+    .stagger > * {
+      animation: rise 0.8s var(--ease) both;
+    }
+    .stagger > *:nth-child(1) {
+      animation-delay: 0.02s;
+    }
+    .stagger > *:nth-child(2) {
+      animation-delay: 0.1s;
+    }
+    .stagger > *:nth-child(3) {
+      animation-delay: 0.18s;
+    }
+    .stagger > *:nth-child(4) {
+      animation-delay: 0.26s;
+    }
+    .stagger > *:nth-child(5) {
+      animation-delay: 0.34s;
+    }
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+        filter: blur(3px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+      }
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%) translateY(12px);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 80;
+      border-radius: 999px;
+      border: 1px solid rgba(234, 240, 255, 0.16);
+      background: rgba(13, 20, 40, 0.72);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 18px 60px rgba(0, 0, 0, 0.45);
+      padding: 10px 12px;
+      color: var(--ink);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      transition: opacity 0.25s var(--ease), transform 0.25s var(--ease);
+      max-width: min(720px, calc(100% - 24px));
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    .toast .tag {
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(103, 255, 154, 0.35);
+      color: rgba(103, 255, 154, 0.95);
+      background: rgba(103, 255, 154, 0.1);
+      flex: none;
+    }
+    .toast .msg {
+      font-size: 13px;
+      color: rgba(234, 240, 255, 0.92);
+      line-height: 1.35;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     /* Commands output panel */
     #commandsPanel {
-      margin: 24px auto 0;
-      max-width: 900px;
+      margin-top: 24px;
       border-radius: var(--radius-md);
       border: 1px solid rgba(103, 255, 154, 0.35);
       background: rgba(13, 20, 40, 0.45);
@@ -505,8 +918,8 @@
       overflow-y: auto;
       white-space: pre-wrap;
       user-select: text;
-      position: relative;
       display: none;
+      position: relative;
     }
     #commandsPanel h3 {
       margin-top: 0;
@@ -566,113 +979,500 @@
   </header>
 
   <main id="top" class="wrap">
-    <!-- Combined Generator Panel -->
-    <section id="generator" class="reveal">
+    <section class="hero">
+      <div class="heroGrid">
+        <div class="stagger">
+          <div class="kicker">
+            <span class="badge"
+              ><span class="dot" aria-hidden="true"></span> Forge/Fabric-ready template output</span
+            >
+            <span class="badge"
+              ><span
+                class="dot"
+                aria-hidden="true"
+                style="background: linear-gradient(180deg, var(--violet), var(--rose));
+                box-shadow: 0 0 0 3px rgba(169, 139, 255, 0.12)"
+              ></span
+              > Jukebox + /give + vanilla behavior</span
+            >
+          </div>
+
+          <h1>
+            Batch convert
+            <span style="color: rgba(103, 255, 154, 0.95)">.ogg</span> +
+            <span style="color: rgba(44, 231, 211, 0.95)">.png/.json</span> into a Minecraft music disc mod.
+          </h1>
+          <p class="lede">
+            Drop your audio files and textures/models, name your discs, and export a complete mod template:
+            items, sounds, lang entries, and the
+            <span style="color: rgba(234, 240, 255, 0.92)">jukebox‑playable</span> music disc behavior.
+            Your discs are obtainable with <code style="font-family: var(--mono)">/give</code> and act like vanilla.
+          </p>
+
+          <div class="heroActions">
+            <button class="btn primary" id="startNow" type="button">
+              <span aria-hidden="true">⟡</span> Build mod template
+            </button>
+            <button
+              class="btn"
+              id="loadDemo"
+              type="button"
+              title="Populate the generator with example discs (no external files)."
+            >
+              Load demo set
+            </button>
+            <button
+              class="btn"
+              id="copyGiveAll"
+              type="button"
+              title="Copies /give commands for all generated discs."
+            >
+              Copy /give commands
+            </button>
+          </div>
+
+          <div class="metaRow" aria-label="Key guarantees">
+            <span><i aria-hidden="true"></i> Works in jukebox (music_disc)</span>
+            <span><i aria-hidden="true"></i> One sound event per disc</span>
+            <span><i aria-hidden="true"></i> Batch-friendly naming</span>
+            <span><i aria-hidden="true"></i> No external images</span>
+          </div>
+        </div>
+
+        <aside class="console reveal" aria-label="Generator console preview">
+          <div class="consoleTop">
+            <div class="lights" aria-hidden="true"><b></b><b></b><b></b></div>
+            <div class="consoleTitle">
+              <span class="chip">discforge</span>
+              <span>export.log</span>
+            </div>
+          </div>
+
+          <div class="consoleBody">
+            <div
+              class="dropzone"
+              id="dropzone"
+              tabindex="0"
+              role="button"
+              aria-label="Drop files here or choose files"
+            >
+              <div class="dzTop">
+                <div>
+                  <h3>Drop files</h3>
+                  <p>
+                    Drag in many <b>.ogg</b> files (required) and <b>.png</b> and/or <b>.json</b> files (optional).
+                    We’ll match by filename and enforce rules:
+                  </p>
+                  <ul style="color: var(--muted); font-size: 12px; margin: 4px 0 0 18px; padding: 0;">
+                    <li>
+                      If both <code>.png</code> and <code>.json</code> exist for the same base name, an error is logged and that disc is skipped.
+                    </li>
+                    <li>
+                      If only <code>.png</code> exists, a flat item model is generated using that texture.
+                    </li>
+                    <li>
+                      If only <code>.json</code> exists without a matching <code>.png</code>, an error is logged and that disc is skipped.
+                    </li>
+                    <li>
+                      <code>.ogg</code> files are required for each disc.
+                    </li>
+                  </ul>
+                </div>
+                <span class="chip">local</span>
+              </div>
+
+              <div class="filePills" aria-label="Accepted file types">
+                <span class="pill">audio/*.ogg</span>
+                <span class="pill">image/*.png</span>
+                <span class="pill">application/json</span>
+                <span class="pill">zip export</span>
+              </div>
+
+              <div class="dzActions">
+                <label class="btn small" for="filePicker">Choose files</label>
+                <input id="filePicker" type="file" multiple accept=".ogg,.png,.json" />
+                <button class="btn small" type="button" id="clearFiles">Clear</button>
+                <span class="hint" style="margin: 0">
+                  Tip: keep names consistent, e.g.
+                  <code style="font-family: var(--mono)">calm1.ogg</code> +
+                  <code style="font-family: var(--mono)">calm1.png</code> or
+                  <code style="font-family: var(--mono)">calm1.json</code>
+                </span>
+              </div>
+            </div>
+
+            <div class="log" id="log" aria-label="Build log" role="log" aria-live="polite"></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="how" class="reveal">
       <div class="sectionHead">
         <div>
-          <h2>Import Files & Configure Mod</h2>
+          <h2>Built for “just like vanilla” behavior</h2>
           <p>
-            Drag & drop your .ogg, .png, and .json files, configure your mod settings, and see your disc list all in one place.
+            The output is structured around Minecraft’s standard music disc pattern:
+            an item that points to a sound event, and a sound definition that points to your
+            <code style="font-family: var(--mono)">.ogg</code>.
+            In‑game it behaves like a normal disc: insert into a jukebox, it plays, and it’s obtainable via
+            <code style="font-family: var(--mono)">/give</code>.
+            The item model is either your uploaded <code>.json</code> or a generated flat model using your <code>.png</code> texture.
           </p>
         </div>
       </div>
 
-      <div id="generatorPanel">
-        <!-- File Import Dropzone -->
-        <div
-          class="dropzone"
-          id="dropzone"
-          tabindex="0"
-          role="button"
-          aria-label="Drop files here or choose files"
-        >
-          <div class="dzTop">
-            <h3>Drop files</h3>
+      <div class="flow">
+        <article class="row">
+          <div style="position: relative">
+            <h3>1) Import audio + textures/models</h3>
             <p>
-              Drag and drop your <b>.ogg</b> audio files and <b>.png</b> textures or <b>.json</b> item models here. Files will be matched by base name.
+              Drop a folder’s worth of <b>.ogg</b> files. Optionally add <b>.png</b> textures and/or <b>.json</b> item models.
+              Rules:
+            </p>
+            <ul style="color: var(--muted); font-size: 13px; margin: 4px 0 0 18px; padding: 0;">
+              <li>
+                If both <code>.png</code> and <code>.json</code> exist for the same base name, an error is logged and that disc is skipped.
+              </li>
+              <li>
+                If only <code>.png</code> exists, a flat item model is generated using that texture.
+              </li>
+              <li>
+                If only <code>.json</code> exists without a matching <code>.png</code>, an error is logged and that disc is skipped.
+              </li>
+              <li>
+                <code>.ogg</code> files are required for each disc.
+              </li>
+            </ul>
+          </div>
+          <aside class="rowAside" aria-label="Naming convention example">
+            <pre class="code"><span class="muted"># Recommended naming</span>
+<span class="k">mellow_night</span>.ogg
+<span class="k">mellow_night</span>.png
+<span class="k">mellow_night</span>.json (optional, but not with .png)
+
+<span class="muted"># Becomes identifiers</span>
+<span class="t">modid</span>:<span class="n">mellow_night</span>
+<span class="t">sound</span>: <span class="t">modid</span>:<span class="n">music_disc.mellow_night</span></pre>
+          </aside>
+        </article>
+
+        <article class="row">
+          <div style="position: relative">
+            <h3>2) Generate registrations + assets</h3>
+            <p>
+              We produce a clean, compile-ready structure: <b>assets</b> (sounds + lang + models + textures) and <b>code stubs</b> (registries)
+              for either Forge or Fabric style projects. You pick the mod ID, namespace, and a consistent naming scheme.
             </p>
           </div>
-          <div class="filePills" aria-label="Accepted file types">
-            <span class="pill">audio/*.ogg</span>
-            <span class="pill">image/*.png</span>
-            <span class="pill">application/json</span>
-            <span class="pill">zip export</span>
+          <aside class="rowAside" aria-label="Sounds JSON example">
+            <pre class="code"><span class="muted">// assets/&lt;modid&gt;/sounds.json</span>
+{
+  "<span class="n">music_disc.mellow_night</span>": {
+    "<span class="k">sounds</span>": [
+      "<span class="n">records/mellow_night</span>"
+    ]
+  }
+}</pre>
+          </aside>
+        </article>
+
+        <article class="row">
+          <div style="position: relative">
+            <h3>3) Use /give + play in jukebox</h3>
+            <p>
+              Each disc item gets a stable identifier, so you can spawn it instantly:
+              <code style="font-family: var(--mono)">/give @p &lt;modid&gt;:&lt;disc_id&gt;</code>.
+              Once in your inventory, it’s a standard music disc item: insert into a jukebox and it plays your <b>.ogg</b>.
+            </p>
           </div>
-          <div class="dzActions">
-            <label class="btn small" for="filePicker">Choose files</label>
-            <input id="filePicker" type="file" multiple accept=".ogg,.png,.json" />
-            <button class="btn small" type="button" id="clearFiles">Clear</button>
-          </div>
+          <aside class="rowAside" aria-label="Give command examples">
+            <pre class="code"><span class="muted"># Give a disc</span>
+/give @p <span class="t">discforge</span>:<span class="n">mellow_night</span>
+
+<span class="muted"># Give multiple</span>
+/give @p <span class="t">discforge</span>:<span class="n">mellow_night</span> <span class="w">3</span>
+
+<span class="muted"># Vanilla-like usage: put in jukebox</span>
+<span class="k">(right-click jukebox)</span></pre>
+          </aside>
+        </article>
+      </div>
+
+      <div class="divider" aria-hidden="true"></div>
+    </section>
+
+    <section id="generator" class="reveal">
+      <div class="sectionHead">
+        <div>
+          <h2>Generator</h2>
+          <p>Configure your mod identity and preview the disc list. Then export a ZIP with a ready-to-place asset tree + registry stubs.</p>
         </div>
+      </div>
 
-        <!-- Mod Settings Form -->
-        <form class="form" id="settingsForm">
-          <div class="stack">
-            <label for="modid">Mod ID</label>
-            <input class="field" id="modid" name="modid" value="discforge" autocomplete="off" spellcheck="false" />
-            <div class="hint">
-              Lowercase, no spaces. Used as namespace:
-              <code style="font-family: var(--mono)">&lt;modid&gt;:&lt;item&gt;</code>
-            </div>
-          </div>
-
-          <div class="stack">
-            <label for="packageName">Java package (optional)</label>
-            <input class="field" id="packageName" name="packageName" value="com.example.discforge" autocomplete="off" spellcheck="false" />
-            <div class="hint">Used in generated stubs (you can change later).</div>
-          </div>
-
-          <div class="stack">
-            <label for="platform">Target</label>
-            <select class="field" id="platform" name="platform" aria-label="Target platform">
-              <option value="fabric">Fabric-style stubs</option>
-              <option value="forge">Forge-style stubs</option>
-            </select>
-            <div class="hint">Both output the same assets; code differs slightly.</div>
-          </div>
-
-          <div class="stack">
-            <label for="mcVersion">Minecraft version</label>
-            <input class="field" id="mcVersion" name="mcVersion" value="1.20.1" autocomplete="off" spellcheck="false" />
-            <div class="hint">For README hints and folder naming guidance.</div>
-          </div>
-
-          <div class="stack wide">
-            <label for="discPrefix">Sound path prefix</label>
-            <input class="field" id="discPrefix" name="discPrefix" value="records/" autocomplete="off" spellcheck="false" />
-            <div class="hint">Your .ogg files will be placed under <code style="font-family: var(--mono)">assets/&lt;modid&gt;/sounds/&lt;prefix&gt;</code>.</div>
-          </div>
-        </form>
-
-        <!-- Disc List -->
+      <div class="gen">
         <div class="panel" aria-label="Disc list panel">
           <div class="panelHead">
-            <h3>Discs <span class="chip" id="countChip">0 discs</span></h3>
-            <button class="btn small" id="autoName" type="button" title="Normalize names into safe identifiers">Normalize IDs</button>
+            <h3>Discs</h3>
+            <div style="display: flex; gap: 10px; align-items: center">
+              <span class="chip" id="countChip">0 discs</span>
+              <button class="btn small" id="autoName" type="button" title="Normalize names into safe identifiers">
+                Normalize IDs
+              </button>
+            </div>
           </div>
           <div class="panelBody">
-            <div class="list" id="discList" aria-label="Generated discs list"></div>
+            <div class="hint" style="margin-top: 0">
+              Files are matched by base name. Example:
+              <code style="font-family: var(--mono)">track01.ogg</code> pairs with
+              <code style="font-family: var(--mono)">track01.png</code> or
+              <code style="font-family: var(--mono)">track01.json</code>.
+              You can edit titles below—IDs stay stable unless you normalize.
+            </div>
+            <div class="list" id="discList" style="margin-top: 12px" aria-label="Generated discs list">
+              <!-- items injected -->
+            </div>
           </div>
         </div>
 
-        <!-- Export & Preview Buttons -->
-        <div id="exportButtons">
-          <button class="btn" id="previewJson" type="button">Preview output</button>
-          <button class="btn" id="copySoundsJson" type="button">Copy sounds.json</button>
-          <button class="btn primary" id="exportZip" type="button">Export ZIP</button>
-        </div>
+        <div class="panel" aria-label="Settings panel">
+          <div class="panelHead">
+            <h3>Mod settings</h3>
+            <span class="chip">export</span>
+          </div>
+          <div class="panelBody">
+            <form class="form" id="settingsForm">
+              <div class="stack">
+                <label for="modid">Mod ID</label>
+                <input
+                  class="field"
+                  id="modid"
+                  name="modid"
+                  value="discforge"
+                  autocomplete="off"
+                  spellcheck="false"
+                />
+                <div class="hint">
+                  Lowercase, no spaces. Used as namespace:
+                  <code style="font-family: var(--mono)">&lt;modid&gt;:&lt;item&gt;</code>
+                </div>
+              </div>
 
-        <!-- Commands output panel -->
-        <div id="commandsPanel" role="region" aria-live="polite" aria-label="Minecraft /give commands for generated discs">
-          <h3>Generated Minecraft /give commands</h3>
-          <button id="copyCommandsBtn" type="button" aria-label="Copy all /give commands">Copy All</button>
-          <pre id="commandsText"></pre>
+              <div class="stack">
+                <label for="packageName">Java package (optional)</label>
+                <input
+                  class="field"
+                  id="packageName"
+                  name="packageName"
+                  value="com.example.discforge"
+                  autocomplete="off"
+                  spellcheck="false"
+                />
+                <div class="hint">Used in generated stubs (you can change later).</div>
+              </div>
+
+              <div class="stack">
+                <label for="platform">Target</label>
+                <select class="field" id="platform" name="platform" aria-label="Target platform">
+                  <option value="fabric">Fabric-style stubs</option>
+                  <option value="forge">Forge-style stubs</option>
+                </select>
+                <div class="hint">Both output the same assets; code differs slightly.</div>
+              </div>
+
+              <div class="stack">
+                <label for="mcVersion">Minecraft version</label>
+                <input
+                  class="field"
+                  id="mcVersion"
+                  name="mcVersion"
+                  value="1.20.1"
+                  autocomplete="off"
+                  spellcheck="false"
+                />
+                <div class="hint">For README hints and folder naming guidance.</div>
+              </div>
+
+              <div class="stack wide">
+                <label for="discPrefix">Sound path prefix</label>
+                <input
+                  class="field"
+                  id="discPrefix"
+                  name="discPrefix"
+                  value="records/"
+                  autocomplete="off"
+                  spellcheck="false"
+                />
+                <div class="hint">
+                  Your .ogg files will be placed under
+                  <code style="font-family: var(--mono)">assets/&lt;modid&gt;/sounds/&lt;prefix&gt;</code>.
+                </div>
+              </div>
+
+              <div class="formActions wide">
+                <button class="btn primary" id="exportZip" type="button">Export ZIP</button>
+                <button class="btn" id="previewJson" type="button">Preview output</button>
+                <button class="btn" id="copySoundsJson" type="button">Copy sounds.json</button>
+              </div>
+
+              <div class="hint wide" id="exportHint">
+                Export includes: <b>assets</b> tree, <b>sounds.json</b>, <b>en_us.json</b>, item model JSONs, textures, and registry stubs.
+                (You still need to compile the mod in your IDE.)
+              </div>
+            </form>
+          </div>
         </div>
+      </div>
+
+      <!-- Commands output panel -->
+      <div
+        id="commandsPanel"
+        role="region"
+        aria-live="polite"
+        aria-label="Minecraft /give commands for generated discs"
+      >
+        <h3>Generated Minecraft /give commands</h3>
+        <button id="copyCommandsBtn" type="button" aria-label="Copy all /give commands">Copy All</button>
+        <pre id="commandsText"></pre>
       </div>
     </section>
 
-    <!-- Other sections (How it works, Output, FAQ) remain unchanged -->
+    <section id="output" class="reveal">
+      <div class="sectionHead">
+        <div>
+          <h2>What you get</h2>
+          <p>
+            A ZIP structured like a real mod project’s resources, plus readable code stubs and a checklist.
+            You can paste the generated folders into your existing mod, or use them as a starting point.
+          </p>
+        </div>
+      </div>
 
+      <div class="flow">
+        <article class="row">
+          <div style="position: relative">
+            <h3>Assets tree (ready)</h3>
+            <p>
+              Includes:
+              <code style="font-family: var(--mono)">assets/&lt;modid&gt;/sounds.json</code>,
+              <code style="font-family: var(--mono)">assets/&lt;modid&gt;/sounds/…</code> (<b>.ogg</b>),
+              <code style="font-family: var(--mono)">assets/&lt;modid&gt;/lang/en_us.json</code>,
+              <code style="font-family: var(--mono)">assets/&lt;modid&gt;/models/item/</code> (<b>.json</b>),
+              <code style="font-family: var(--mono)">assets/&lt;modid&gt;/textures/item/</code> (<b>.png</b>)
+            </p>
+          </div>
+          <aside class="rowAside" aria-label="Tree preview">
+            <pre class="code"><span class="muted">assets/</span>
+  <span class="t">&lt;modid&gt;</span>/
+    <span class="k">lang</span>/en_us.json
+    <span class="k">models</span>/item/<span class="n">&lt;disc_id&gt;</span>.json
+    <span class="k">sounds</span>/<span class="n">records/</span><span class="n">&lt;disc_id&gt;</span>.ogg
+    <span class="k">textures</span>/item/<span class="n">&lt;disc_id&gt;</span>.png
+    sounds.json</pre>
+          </aside>
+        </article>
+
+        <article class="row">
+          <div style="position: relative">
+            <h3>Give commands (stable)</h3>
+            <p>
+              Every generated disc is an item you can spawn instantly. Great for testing:
+              no loot tables, no crafting recipes, no tags required.
+              Add recipes later if you want—this template stays clean and vanilla-like.
+            </p>
+          </div>
+          <aside class="rowAside" aria-label="Give command template">
+            <pre class="code"><span class="muted"># Template</span>
+/give @p <span class="t">&lt;modid&gt;</span>:<span class="n">&lt;disc_id&gt;</span>
+
+<span class="muted"># Example</span>
+/give @p <span class="t">discforge</span>:<span class="n">mellow_night</span></pre>
+          </aside>
+        </article>
+
+        <article class="row">
+          <div style="position: relative">
+            <h3>Registry stubs (minimal)</h3>
+            <p>
+              We generate small, readable registration code: item registration, sound event keys, and a “music disc item” definition pointing to your sound.
+              You can merge it into your existing registries and naming conventions.
+            </p>
+          </div>
+          <aside class="rowAside" aria-label="Registry stub preview">
+            <pre class="code"><span class="muted">// Pseudocode outline</span>
+registerSound(<span class="t">modid</span>:<span class="n">music_disc.mellow_night</span>)
+registerItem(<span class="t">modid</span>:<span class="n">mellow_night</span>,
+  new MusicDiscItem(
+    <span class="w">comparatorOutput</span>=<span class="w">1</span>,
+    <span class="w">sound</span>=<span class="n">music_disc.mellow_night</span>,
+    <span class="w">lengthSeconds</span>=<span class="w">178</span>
+  )
+)</pre>
+          </aside>
+        </article>
+      </div>
+    </section>
+
+    <section id="faq" class="reveal">
+      <div class="sectionHead">
+        <div>
+          <h2>FAQ</h2>
+          <p>Practical answers for making discs behave like vanilla and keeping identifiers clean.</p>
+        </div>
+      </div>
+
+      <div class="flow">
+        <article class="row">
+          <div style="position: relative">
+            <h3>Will the discs work in a jukebox?</h3>
+            <p>
+              Yes—when you compile the generated template into a mod, each disc is registered as a music disc item pointing to its sound event.
+              In-game it inserts into a jukebox and plays like a vanilla disc.
+            </p>
+          </div>
+          <aside class="rowAside">
+            <pre class="code"><span class="muted">Key requirements:</span>
+• Item type: <span class="k">MusicDisc</span>
+• Sound event: <span class="k">registered</span>
+• sounds.json: <span class="k">valid</span>
+• .ogg location: <span class="k">assets/&lt;modid&gt;/sounds/…</span></pre>
+          </aside>
+        </article>
+
+        <article class="row">
+          <div style="position: relative">
+            <h3>What about .png/.json?</h3>
+            <p>
+              This generator packages PNG textures and JSON item models.
+              If you upload both PNG and JSON for the same disc, it logs an error and skips that disc.
+              If you upload only PNG, it generates a flat item model JSON referencing that PNG.
+              If you upload only JSON without PNG, it logs an error and skips that disc.
+            </p>
+          </div>
+          <aside class="rowAside">
+            <pre class="code"><span class="muted">Suggested workflow:</span>
+1) Upload .ogg + .png for each disc (recommended)
+2) Optionally upload .json if you want a custom model (but not with .png)
+3) Export and compile your mod</pre>
+          </aside>
+        </article>
+
+        <article class="row">
+          <div style="position: relative">
+            <h3>Do you upload my files?</h3>
+            <p>
+              No. All processing happens locally in your browser session. The ZIP is generated client-side.
+            </p>
+          </div>
+          <aside class="rowAside">
+            <pre class="code"><span class="muted">Privacy model:</span>
+• No network requests
+• No external file hosts
+• Export is a local download</pre>
+          </aside>
+        </article>
+      </div>
+    </section>
   </main>
 
   <footer>
