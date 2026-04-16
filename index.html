@@ -4,701 +4,902 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="color-scheme" content="dark" />
-  <title>DiscForge — Turn .ogg + .bbmodel into a Minecraft Music Disc Mod</title>
+  <title>DiscForge — Turn .ogg + .png/.json into a Minecraft Music Disc Mod</title>
 
   <!-- Typography: display + readable body -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,650;9..144,800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,650;9..144,800&display=swap"
+    rel="stylesheet"
+  />
 
   <style>
-    :root{
+    :root {
       /* Retro-tech / “modding terminal” vibe with crafted color system */
-      --bg0:#070A0F;
-      --bg1:#0B1020;
-      --panel:#0D1428;
-      --panel2:#0B1226;
-      --ink:#EAF0FF;
-      --muted:#A7B3DA;
-      --faint:#7E8BB6;
+      --bg0: #070a0f;
+      --bg1: #0b1020;
+      --panel: #0d1428;
+      --panel2: #0b1226;
+      --ink: #eaf0ff;
+      --muted: #a7b3da;
+      --faint: #7e8bb6;
 
-      --lime:#67FF9A;
-      --teal:#2CE7D3;
-      --amber:#FFB000;
-      --rose:#FF4D7D;
-      --violet:#A98BFF;
+      --lime: #67ff9a;
+      --teal: #2ce7d3;
+      --amber: #ffb000;
+      --rose: #ff4d7d;
+      --violet: #a98bff;
 
-      --stroke: rgba(234,240,255,.10);
-      --stroke2: rgba(234,240,255,.16);
-      --shadow: 0 18px 60px rgba(0,0,0,.55);
+      --stroke: rgba(234, 240, 255, 0.1);
+      --stroke2: rgba(234, 240, 255, 0.16);
+      --shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
 
       --radius-lg: 26px;
       --radius-md: 18px;
       --radius-sm: 12px;
 
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+        "Courier New", monospace;
       --display: "Fraunces", serif;
       --body: "Space Grotesk", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
 
       --pad: clamp(18px, 2.2vw, 28px);
       --max: 1160px;
 
-      --ease: cubic-bezier(.2,.9,.2,1);
+      --ease: cubic-bezier(0.2, 0.9, 0.2, 1);
     }
 
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      background:
-        radial-gradient(1100px 600px at 18% 8%, rgba(103,255,154,.18), transparent 55%),
-        radial-gradient(900px 520px at 82% 18%, rgba(44,231,211,.16), transparent 60%),
-        radial-gradient(860px 520px at 72% 84%, rgba(169,139,255,.14), transparent 58%),
-        radial-gradient(900px 520px at 30% 92%, rgba(255,77,125,.10), transparent 62%),
+    * {
+      box-sizing: border-box;
+    }
+    html,
+    body {
+      height: 100%;
+    }
+    body {
+      margin: 0;
+      background: radial-gradient(1100px 600px at 18% 8%, rgba(103, 255, 154, 0.18), transparent 55%),
+        radial-gradient(900px 520px at 82% 18%, rgba(44, 231, 211, 0.16), transparent 60%),
+        radial-gradient(860px 520px at 72% 84%, rgba(169, 139, 255, 0.14), transparent 58%),
+        radial-gradient(900px 520px at 30% 92%, rgba(255, 77, 125, 0.1), transparent 62%),
         linear-gradient(180deg, var(--bg0), var(--bg1));
-      color:var(--ink);
-      font-family:var(--body);
-      letter-spacing:.2px;
-      overflow-x:hidden;
+      color: var(--ink);
+      font-family: var(--body);
+      letter-spacing: 0.2px;
+      overflow-x: hidden;
     }
 
-    a{color:inherit}
-    .wrap{max-width:var(--max); margin:0 auto; padding: 0 var(--pad);}
-    .sr-only{
-      position:absolute!important; width:1px; height:1px; padding:0; margin:-1px;
-      overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+    a {
+      color: inherit;
+    }
+    .wrap {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 0 var(--pad);
+    }
+    .sr-only {
+      position: absolute !important;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
     }
 
     /* Subtle pixel grid texture */
-    .grain{
-      position:fixed; inset:0; pointer-events:none; opacity:.22; mix-blend-mode:overlay;
-      background:
-        linear-gradient(transparent 15px, rgba(255,255,255,.04) 16px),
-        linear-gradient(90deg, transparent 15px, rgba(255,255,255,.04) 16px);
-      background-size:16px 16px;
+    .grain {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.22;
+      mix-blend-mode: overlay;
+      background: linear-gradient(transparent 15px, rgba(255, 255, 255, 0.04) 16px),
+        linear-gradient(90deg, transparent 15px, rgba(255, 255, 255, 0.04) 16px);
+      background-size: 16px 16px;
       mask-image: radial-gradient(1200px 700px at 50% 20%, #000 55%, transparent 100%);
     }
 
     /* Top nav */
-    header{
-      position:sticky; top:0; z-index:50;
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
       backdrop-filter: blur(14px);
-      background: linear-gradient(180deg, rgba(7,10,15,.78), rgba(7,10,15,.46));
+      background: linear-gradient(180deg, rgba(7, 10, 15, 0.78), rgba(7, 10, 15, 0.46));
       border-bottom: 1px solid var(--stroke);
     }
-    .nav{
-      display:flex; align-items:center; justify-content:space-between;
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       padding: 14px var(--pad);
-      max-width:var(--max); margin:0 auto;
-      gap:14px;
+      max-width: var(--max);
+      margin: 0 auto;
+      gap: 14px;
     }
-    .brand{
-      display:flex; align-items:center; gap:12px; min-width: 220px;
-      text-decoration:none;
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 220px;
+      text-decoration: none;
     }
-    .mark{
-      width:38px; height:38px; border-radius:12px;
-      background:
-        radial-gradient(12px 12px at 28% 30%, rgba(103,255,154,.85), transparent 60%),
-        radial-gradient(12px 12px at 68% 62%, rgba(44,231,211,.8), transparent 60%),
-        linear-gradient(135deg, rgba(169,139,255,.22), rgba(255,77,125,.12));
-      border: 1px solid rgba(234,240,255,.18);
-      box-shadow: 0 10px 28px rgba(0,0,0,.45);
-      position:relative;
-      overflow:hidden;
-    }
-    .mark:before{
-      content:"";
-      position:absolute; inset:-30%;
-      background: conic-gradient(from 180deg, transparent, rgba(103,255,154,.35), transparent 55%, rgba(44,231,211,.3), transparent);
-      animation: spin 9s linear infinite;
-      opacity:.8;
-    }
-    @keyframes spin {to{transform:rotate(360deg)}}
-    .brand b{
-      font-family:var(--display);
-      letter-spacing:.2px;
-      font-weight:800;
-      font-size: 18px;
-      line-height:1.05;
-    }
-    .brand span{
-      display:block;
-      font-family:var(--mono);
-      font-size:12px;
-      color:var(--muted);
-      margin-top:2px;
-    }
-
-    .navlinks{
-      display:flex; align-items:center; gap:16px;
-    }
-    .navlinks a{
-      text-decoration:none;
-      color:var(--muted);
-      font-weight:600;
-      font-size:13px;
-      letter-spacing:.4px;
-      text-transform:uppercase;
-      padding:10px 10px;
+    .mark {
+      width: 38px;
+      height: 38px;
       border-radius: 12px;
-      transition: transform .18s var(--ease), background .18s var(--ease), color .18s var(--ease);
+      background: radial-gradient(12px 12px at 28% 30%, rgba(103, 255, 154, 0.85), transparent 60%),
+        radial-gradient(12px 12px at 68% 62%, rgba(44, 231, 211, 0.8), transparent 60%),
+        linear-gradient(135deg, rgba(169, 139, 255, 0.22), rgba(255, 77, 125, 0.12));
+      border: 1px solid rgba(234, 240, 255, 0.18);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+      position: relative;
+      overflow: hidden;
     }
-    .navlinks a:hover{
-      color:var(--ink);
-      background: rgba(234,240,255,.06);
+    .mark:before {
+      content: "";
+      position: absolute;
+      inset: -30%;
+      background: conic-gradient(
+        from 180deg,
+        transparent,
+        rgba(103, 255, 154, 0.35),
+        transparent 55%,
+        rgba(44, 231, 211, 0.3),
+        transparent
+      );
+      animation: spin 9s linear infinite;
+      opacity: 0.8;
+    }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    .brand b {
+      font-family: var(--display);
+      letter-spacing: 0.2px;
+      font-weight: 800;
+      font-size: 18px;
+      line-height: 1.05;
+    }
+    .brand span {
+      display: block;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .navlinks {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .navlinks a {
+      text-decoration: none;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 13px;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      padding: 10px 10px;
+      border-radius: 12px;
+      transition: transform 0.18s var(--ease), background 0.18s var(--ease), color 0.18s var(--ease);
+    }
+    .navlinks a:hover {
+      color: var(--ink);
+      background: rgba(234, 240, 255, 0.06);
       transform: translateY(-1px);
     }
 
-    .navcta{
-      display:flex; align-items:center; gap:10px;
+    .navcta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
-    .btn{
-      appearance:none;
-      border:1px solid rgba(234,240,255,.18);
-      background: rgba(13,20,40,.65);
-      color:var(--ink);
-      padding:10px 12px;
+    .btn {
+      appearance: none;
+      border: 1px solid rgba(234, 240, 255, 0.18);
+      background: rgba(13, 20, 40, 0.65);
+      color: var(--ink);
+      padding: 10px 12px;
       border-radius: 14px;
-      font-weight:700;
-      letter-spacing:.2px;
-      cursor:pointer;
-      transition: transform .18s var(--ease), border-color .18s var(--ease), background .18s var(--ease), box-shadow .18s var(--ease);
-      display:inline-flex; align-items:center; gap:10px;
-      user-select:none;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      cursor: pointer;
+      transition: transform 0.18s var(--ease), border-color 0.18s var(--ease),
+        background 0.18s var(--ease), box-shadow 0.18s var(--ease);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      user-select: none;
     }
-    .btn:hover{
+    .btn:hover {
       transform: translateY(-1px);
-      border-color: rgba(103,255,154,.35);
-      box-shadow: 0 16px 40px rgba(0,0,0,.35);
-      background: rgba(13,20,40,.78);
+      border-color: rgba(103, 255, 154, 0.35);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+      background: rgba(13, 20, 40, 0.78);
     }
-    .btn:active{ transform: translateY(0px) scale(.98); }
-    .btn.primary{
-      border-color: rgba(103,255,154,.40);
-      background:
-        linear-gradient(180deg, rgba(103,255,154,.15), rgba(44,231,211,.09));
+    .btn:active {
+      transform: translateY(0px) scale(0.98);
     }
-    .btn.primary:hover{
-      border-color: rgba(44,231,211,.52);
+    .btn.primary {
+      border-color: rgba(103, 255, 154, 0.4);
+      background: linear-gradient(180deg, rgba(103, 255, 154, 0.15), rgba(44, 231, 211, 0.09));
     }
-    .chip{
+    .btn.primary:hover {
+      border-color: rgba(44, 231, 211, 0.52);
+    }
+    .chip {
       font-family: var(--mono);
-      font-size:12px;
-      padding:3px 8px;
+      font-size: 12px;
+      padding: 3px 8px;
       border-radius: 999px;
-      border:1px solid rgba(234,240,255,.18);
-      background: rgba(7,10,15,.35);
+      border: 1px solid rgba(234, 240, 255, 0.18);
+      background: rgba(7, 10, 15, 0.35);
       color: var(--muted);
     }
 
     /* Hero */
-    main{padding-bottom: 70px;}
-    .hero{
+    main {
+      padding-bottom: 70px;
+    }
+    .hero {
       padding: clamp(22px, 4.5vw, 54px) 0 18px;
-      position:relative;
+      position: relative;
     }
-    .heroGrid{
-      display:grid;
-      grid-template-columns: 1.15fr .85fr;
+    .heroGrid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
       gap: clamp(18px, 3vw, 30px);
-      align-items:stretch;
+      align-items: stretch;
     }
-    @media (max-width: 980px){
-      .heroGrid{grid-template-columns:1fr; }
-      .brand{min-width:unset;}
-      .navlinks{display:none;}
+    @media (max-width: 980px) {
+      .heroGrid {
+        grid-template-columns: 1fr;
+      }
+      .brand {
+        min-width: unset;
+      }
+      .navlinks {
+        display: none;
+      }
     }
-    .kicker{
-      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+    .kicker {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
       margin-bottom: 16px;
     }
-    .badge{
-      display:inline-flex; align-items:center; gap:8px;
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       padding: 8px 12px;
       border-radius: 999px;
-      border:1px solid rgba(234,240,255,.16);
-      background: rgba(13,20,40,.52);
+      border: 1px solid rgba(234, 240, 255, 0.16);
+      background: rgba(13, 20, 40, 0.52);
       color: var(--muted);
-      font-weight:700;
-      letter-spacing:.2px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
       font-size: 13px;
     }
-    .dot{
-      width:10px; height:10px; border-radius:999px;
-      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.9), rgba(255,255,255,0) 45%),
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 45%),
         linear-gradient(180deg, var(--lime), var(--teal));
-      box-shadow: 0 0 0 3px rgba(103,255,154,.12);
+      box-shadow: 0 0 0 3px rgba(103, 255, 154, 0.12);
     }
 
-    h1{
+    h1 {
       margin: 0 0 12px 0;
       font-family: var(--display);
       font-weight: 800;
-      line-height: .95;
-      letter-spacing: -.8px;
+      line-height: 0.95;
+      letter-spacing: -0.8px;
       font-size: clamp(40px, 4.5vw, 78px);
     }
-    .lede{
+    .lede {
       margin: 0 0 18px;
       color: var(--muted);
       max-width: 62ch;
       font-size: clamp(16px, 1.35vw, 18px);
       line-height: 1.55;
     }
-    .heroActions{
-      display:flex; flex-wrap:wrap; gap:12px;
+    .heroActions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
       margin-top: 18px;
-      align-items:center;
+      align-items: center;
     }
-    .metaRow{
-      display:flex; gap:16px; flex-wrap:wrap;
+    .metaRow {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
       margin-top: 18px;
       color: var(--faint);
       font-family: var(--mono);
       font-size: 12px;
     }
-    .metaRow span{
-      display:inline-flex; gap:8px; align-items:center;
-      padding:6px 10px;
-      border:1px dashed rgba(234,240,255,.14);
-      border-radius:999px;
-      background: rgba(7,10,15,.22);
+    .metaRow span {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      padding: 6px 10px;
+      border: 1px dashed rgba(234, 240, 255, 0.14);
+      border-radius: 999px;
+      background: rgba(7, 10, 15, 0.22);
     }
-    .metaRow i{
-      width:8px; height:8px; border-radius:999px;
-      background: rgba(234,240,255,.34);
+    .metaRow i {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(234, 240, 255, 0.34);
     }
 
     /* Right panel: “console” */
-    .console{
+    .console {
       border-radius: var(--radius-lg);
-      border: 1px solid rgba(234,240,255,.16);
-      background: linear-gradient(180deg, rgba(13,20,40,.78), rgba(11,18,38,.62));
+      border: 1px solid rgba(234, 240, 255, 0.16);
+      background: linear-gradient(180deg, rgba(13, 20, 40, 0.78), rgba(11, 18, 38, 0.62));
       box-shadow: var(--shadow);
-      overflow:hidden;
-      position:relative;
+      overflow: hidden;
+      position: relative;
       min-height: 420px;
     }
-    .consoleTop{
-      display:flex; align-items:center; justify-content:space-between;
+    .consoleTop {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       padding: 14px 16px;
-      border-bottom: 1px solid rgba(234,240,255,.12);
-      background: linear-gradient(180deg, rgba(7,10,15,.35), rgba(7,10,15,.12));
+      border-bottom: 1px solid rgba(234, 240, 255, 0.12);
+      background: linear-gradient(180deg, rgba(7, 10, 15, 0.35), rgba(7, 10, 15, 0.12));
     }
-    .lights{display:flex; gap:8px; align-items:center;}
-    .lights b{
-      width:10px; height:10px; border-radius:999px; display:inline-block;
-      box-shadow: 0 0 0 3px rgba(255,255,255,.06);
+    .lights {
+      display: flex;
+      gap: 8px;
+      align-items: center;
     }
-    .lights b:nth-child(1){ background: rgba(255,77,125,.85); }
-    .lights b:nth-child(2){ background: rgba(255,176,0,.85); }
-    .lights b:nth-child(3){ background: rgba(103,255,154,.85); }
-    .consoleTitle{
+    .lights b {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      display: inline-block;
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.06);
+    }
+    .lights b:nth-child(1) {
+      background: rgba(255, 77, 125, 0.85);
+    }
+    .lights b:nth-child(2) {
+      background: rgba(255, 176, 0, 0.85);
+    }
+    .lights b:nth-child(3) {
+      background: rgba(103, 255, 154, 0.85);
+    }
+    .consoleTitle {
       font-family: var(--mono);
       font-size: 12px;
       color: var(--muted);
-      display:flex; gap:10px; align-items:center;
+      display: flex;
+      gap: 10px;
+      align-items: center;
     }
-    .consoleTitle .chip{border-style:solid; background: rgba(13,20,40,.55);}
-    .consoleBody{
+    .consoleTitle .chip {
+      border-style: solid;
+      background: rgba(13, 20, 40, 0.55);
+    }
+    .consoleBody {
       padding: 16px;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
-    .dropzone{
+    .dropzone {
       border-radius: 18px;
-      border: 1px dashed rgba(234,240,255,.22);
-      background:
-        radial-gradient(450px 220px at 25% 30%, rgba(103,255,154,.10), transparent 60%),
-        radial-gradient(450px 220px at 70% 70%, rgba(44,231,211,.10), transparent 60%),
-        rgba(7,10,15,.28);
+      border: 1px dashed rgba(234, 240, 255, 0.22);
+      background: radial-gradient(450px 220px at 25% 30%, rgba(103, 255, 154, 0.1), transparent 60%),
+        radial-gradient(450px 220px at 70% 70%, rgba(44, 231, 211, 0.1), transparent 60%), rgba(7, 10, 15, 0.28);
       padding: 14px;
       min-height: 150px;
-      display:flex; flex-direction:column; gap:10px;
-      position:relative;
-      overflow:hidden;
-      transition: border-color .2s var(--ease), transform .2s var(--ease), background .2s var(--ease);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s var(--ease), transform 0.2s var(--ease), background 0.2s var(--ease);
     }
-    .dropzone.isDrag{
-      border-color: rgba(103,255,154,.55);
+    .dropzone.isDrag {
+      border-color: rgba(103, 255, 154, 0.55);
       transform: translateY(-2px);
-      background:
-        radial-gradient(550px 260px at 25% 30%, rgba(103,255,154,.14), transparent 62%),
-        radial-gradient(520px 260px at 70% 70%, rgba(44,231,211,.14), transparent 62%),
-        rgba(7,10,15,.30);
+      background: radial-gradient(550px 260px at 25% 30%, rgba(103, 255, 154, 0.14), transparent 62%),
+        radial-gradient(520px 260px at 70% 70%, rgba(44, 231, 211, 0.14), transparent 62%), rgba(7, 10, 15, 0.3);
     }
-    .dzTop{
-      display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+    .dzTop {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
     }
-    .dzTop h3{
-      margin:0;
+    .dzTop h3 {
+      margin: 0;
       font-family: var(--display);
       font-weight: 800;
-      letter-spacing: -.3px;
+      letter-spacing: -0.3px;
       font-size: 20px;
-      line-height:1.05;
+      line-height: 1.05;
     }
-    .dzTop p{
-      margin:4px 0 0;
+    .dzTop p {
+      margin: 4px 0 0;
       color: var(--muted);
       font-size: 13px;
-      line-height:1.45;
+      line-height: 1.45;
       max-width: 44ch;
     }
-    .filePills{
-      display:flex; flex-wrap:wrap; gap:8px; margin-top: 6px;
+    .filePills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
       color: var(--muted);
       font-family: var(--mono);
       font-size: 12px;
     }
-    .pill{
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid rgba(234,240,255,.14);
-      background: rgba(13,20,40,.40);
+    .pill {
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(234, 240, 255, 0.14);
+      background: rgba(13, 20, 40, 0.4);
     }
-    .dzActions{
-      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+    .dzActions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
       margin-top: 2px;
     }
-    .btn.small{padding:9px 11px; border-radius: 12px; font-size: 13px;}
-    input[type="file"]{display:none;}
+    .btn.small {
+      padding: 9px 11px;
+      border-radius: 12px;
+      font-size: 13px;
+    }
+    input[type="file"] {
+      display: none;
+    }
 
-    .log{
+    .log {
       border-radius: 18px;
-      border: 1px solid rgba(234,240,255,.12);
-      background: rgba(7,10,15,.28);
+      border: 1px solid rgba(234, 240, 255, 0.12);
+      background: rgba(7, 10, 15, 0.28);
       padding: 12px 12px;
       height: 170px;
-      overflow:auto;
+      overflow: auto;
       font-family: var(--mono);
       font-size: 12px;
-      color: rgba(234,240,255,.88);
+      color: rgba(234, 240, 255, 0.88);
       line-height: 1.45;
+      white-space: pre-wrap;
     }
-    .log .muted{color: rgba(167,179,218,.86);}
-    .log .ok{color: rgba(103,255,154,.92);}
-    .log .warn{color: rgba(255,176,0,.92);}
-    .log .err{color: rgba(255,77,125,.95);}
-    .logLine{white-space:pre-wrap; margin:0 0 6px 0;}
+    .log .muted {
+      color: rgba(167, 179, 218, 0.86);
+    }
+    .log .ok {
+      color: rgba(103, 255, 154, 0.92);
+    }
+    .log .warn {
+      color: rgba(255, 176, 0, 0.92);
+    }
+    .log .err {
+      color: rgba(255, 77, 125, 0.95);
+    }
+    .logLine {
+      margin: 0 0 6px 0;
+    }
 
     /* Sections */
-    section{
+    section {
       padding: clamp(22px, 4vw, 54px) 0;
     }
-    .sectionHead{
-      display:flex; align-items:flex-end; justify-content:space-between; gap:18px;
+    .sectionHead {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 18px;
       margin-bottom: 16px;
     }
-    .sectionHead h2{
-      margin:0;
+    .sectionHead h2 {
+      margin: 0;
       font-family: var(--display);
       font-weight: 800;
-      letter-spacing: -.6px;
+      letter-spacing: -0.6px;
       font-size: clamp(26px, 2.5vw, 40px);
-      line-height:1.02;
+      line-height: 1.02;
     }
-    .sectionHead p{
-      margin:0;
+    .sectionHead p {
+      margin: 0;
       color: var(--muted);
       max-width: 60ch;
-      line-height:1.55;
+      line-height: 1.55;
     }
-    .divider{
-      height:1px;
-      background: linear-gradient(90deg, transparent, rgba(234,240,255,.16), transparent);
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(234, 240, 255, 0.16), transparent);
       margin: 22px 0 0;
     }
 
     /* “No cards” feature blocks: use split rows */
-    .flow{
-      display:grid;
+    .flow {
+      display: grid;
       grid-template-columns: 1fr;
       gap: 14px;
       margin-top: 14px;
     }
-    .row{
-      display:grid;
-      grid-template-columns: .92fr 1.08fr;
+    .row {
+      display: grid;
+      grid-template-columns: 0.92fr 1.08fr;
       gap: 16px;
       border-radius: var(--radius-lg);
-      border: 1px solid rgba(234,240,255,.12);
-      background:
-        linear-gradient(180deg, rgba(13,20,40,.55), rgba(11,18,38,.35));
+      border: 1px solid rgba(234, 240, 255, 0.12);
+      background: linear-gradient(180deg, rgba(13, 20, 40, 0.55), rgba(11, 18, 38, 0.35));
       padding: 16px;
-      overflow:hidden;
-      position:relative;
+      overflow: hidden;
+      position: relative;
     }
-    .row:before{
-      content:"";
-      position:absolute; inset:-2px;
-      background:
-        radial-gradient(380px 160px at 18% 18%, rgba(103,255,154,.10), transparent 65%),
-        radial-gradient(380px 160px at 88% 68%, rgba(169,139,255,.10), transparent 65%);
-      pointer-events:none;
-      opacity:.9;
+    .row:before {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      background: radial-gradient(380px 160px at 18% 18%, rgba(103, 255, 154, 0.1), transparent 65%),
+        radial-gradient(380px 160px at 88% 68%, rgba(169, 139, 255, 0.1), transparent 65%);
+      pointer-events: none;
+      opacity: 0.9;
     }
-    @media (max-width: 980px){
-      .row{grid-template-columns:1fr;}
+    @media (max-width: 980px) {
+      .row {
+        grid-template-columns: 1fr;
+      }
     }
-    .row h3{
-      margin:0 0 8px 0;
+    .row h3 {
+      margin: 0 0 8px 0;
       font-family: var(--display);
-      letter-spacing: -.35px;
+      letter-spacing: -0.35px;
       font-weight: 800;
       font-size: 22px;
-      position:relative;
+      position: relative;
     }
-    .row p{
-      margin:0;
+    .row p {
+      margin: 0;
       color: var(--muted);
-      line-height:1.6;
-      position:relative;
+      line-height: 1.6;
+      position: relative;
     }
-    .rowAside{
-      position:relative;
+    .rowAside {
+      position: relative;
       border-radius: 18px;
-      border: 1px solid rgba(234,240,255,.12);
-      background:
-        radial-gradient(360px 200px at 20% 30%, rgba(44,231,211,.10), transparent 60%),
-        radial-gradient(360px 200px at 70% 70%, rgba(255,176,0,.10), transparent 60%),
-        rgba(7,10,15,.26);
+      border: 1px solid rgba(234, 240, 255, 0.12);
+      background: radial-gradient(360px 200px at 20% 30%, rgba(44, 231, 211, 0.1), transparent 60%),
+        radial-gradient(360px 200px at 70% 70%, rgba(255, 176, 0, 0.1), transparent 60%), rgba(7, 10, 15, 0.26);
       padding: 14px;
-      overflow:hidden;
+      overflow: hidden;
     }
-    .rowAside .code{
+    .rowAside .code {
       font-family: var(--mono);
       font-size: 12px;
       line-height: 1.55;
-      color: rgba(234,240,255,.88);
+      color: rgba(234, 240, 255, 0.88);
       white-space: pre-wrap;
-      margin:0;
+      margin: 0;
     }
-    .rowAside .code .k{color: rgba(103,255,154,.92);}
-    .rowAside .code .t{color: rgba(44,231,211,.92);}
-    .rowAside .code .n{color: rgba(169,139,255,.95);}
-    .rowAside .code .w{color: rgba(255,176,0,.92);}
-    .rowAside .code .r{color: rgba(255,77,125,.92);}
+    .rowAside .code .k {
+      color: rgba(103, 255, 154, 0.92);
+    }
+    .rowAside .code .t {
+      color: rgba(44, 231, 211, 0.92);
+    }
+    .rowAside .code .n {
+      color: rgba(169, 139, 255, 0.95);
+    }
+    .rowAside .code .w {
+      color: rgba(255, 176, 0, 0.92);
+    }
+    .rowAside .code .r {
+      color: rgba(255, 77, 125, 0.92);
+    }
 
     /* Gallery list (allowed: it’s a list of generated discs) */
-    .gen{
-      display:grid;
-      grid-template-columns: 1.1fr .9fr;
+    .gen {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
       gap: 16px;
-      align-items:start;
+      align-items: start;
       margin-top: 18px;
     }
-    @media (max-width: 980px){ .gen{grid-template-columns:1fr;} }
+    @media (max-width: 980px) {
+      .gen {
+        grid-template-columns: 1fr;
+      }
+    }
 
-    .panel{
+    .panel {
       border-radius: var(--radius-lg);
-      border: 1px solid rgba(234,240,255,.14);
-      background: linear-gradient(180deg, rgba(13,20,40,.62), rgba(11,18,38,.40));
-      box-shadow: 0 16px 50px rgba(0,0,0,.35);
-      overflow:hidden;
+      border: 1px solid rgba(234, 240, 255, 0.14);
+      background: linear-gradient(180deg, rgba(13, 20, 40, 0.62), rgba(11, 18, 38, 0.4));
+      box-shadow: 0 16px 50px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
     }
-    .panelHead{
+    .panelHead {
       padding: 14px 16px;
-      border-bottom: 1px solid rgba(234,240,255,.12);
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-      background: rgba(7,10,15,.18);
+      border-bottom: 1px solid rgba(234, 240, 255, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: rgba(7, 10, 15, 0.18);
     }
-    .panelHead h3{
-      margin:0;
+    .panelHead h3 {
+      margin: 0;
       font-family: var(--display);
       font-weight: 800;
-      letter-spacing: -.3px;
+      letter-spacing: -0.3px;
       font-size: 20px;
     }
-    .panelBody{ padding: 14px 16px; }
-
-    .list{
-      display:flex; flex-direction:column; gap:10px;
+    .panelBody {
+      padding: 14px 16px;
     }
-    .item{
-      display:grid;
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .item {
+      display: grid;
       grid-template-columns: 42px 1fr auto;
       gap: 12px;
-      align-items:center;
+      align-items: center;
       padding: 10px 10px;
       border-radius: 16px;
-      border: 1px solid rgba(234,240,255,.10);
-      background: rgba(7,10,15,.24);
-      transition: transform .18s var(--ease), border-color .18s var(--ease), background .18s var(--ease);
+      border: 1px solid rgba(234, 240, 255, 0.1);
+      background: rgba(7, 10, 15, 0.24);
+      transition: transform 0.18s var(--ease), border-color 0.18s var(--ease),
+        background 0.18s var(--ease);
     }
-    .item:hover{
+    .item:hover {
       transform: translateY(-1px);
-      border-color: rgba(44,231,211,.28);
-      background: rgba(7,10,15,.30);
+      border-color: rgba(44, 231, 211, 0.28);
+      background: rgba(7, 10, 15, 0.3);
     }
-    .discIcon{
-      width:42px; height:42px; border-radius: 14px;
-      border:1px solid rgba(234,240,255,.14);
-      background:
-        radial-gradient(10px 10px at 36% 34%, rgba(255,255,255,.95), transparent 55%),
-        radial-gradient(14px 14px at 62% 62%, rgba(44,231,211,.55), transparent 60%),
-        conic-gradient(from 0deg, rgba(103,255,154,.55), rgba(169,139,255,.45), rgba(255,77,125,.45), rgba(255,176,0,.38), rgba(103,255,154,.55));
-      position:relative;
-      overflow:hidden;
+    .discIcon {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      border: 1px solid rgba(234, 240, 255, 0.14);
+      background: radial-gradient(10px 10px at 36% 34%, rgba(255, 255, 255, 0.95), transparent 55%),
+        radial-gradient(14px 14px at 62% 62%, rgba(44, 231, 211, 0.55), transparent 60%),
+        conic-gradient(
+          from 0deg,
+          rgba(103, 255, 154, 0.55),
+          rgba(169, 139, 255, 0.45),
+          rgba(255, 77, 125, 0.45),
+          rgba(255, 176, 0, 0.38),
+          rgba(103, 255, 154, 0.55)
+        );
+      position: relative;
+      overflow: hidden;
     }
-    .discIcon:after{
-      content:"";
-      position:absolute; inset:12px;
+    .discIcon:after {
+      content: "";
+      position: absolute;
+      inset: 12px;
       border-radius: 999px;
-      background: radial-gradient(circle at 30% 30%, rgba(0,0,0,.25), rgba(0,0,0,.62));
-      border: 1px solid rgba(234,240,255,.10);
+      background: radial-gradient(circle at 30% 30%, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.62));
+      border: 1px solid rgba(234, 240, 255, 0.1);
     }
-    .item b{font-weight:800;}
-    .item small{
-      display:block;
+    .item b {
+      font-weight: 800;
+    }
+    .item small {
+      display: block;
       color: var(--muted);
       font-family: var(--mono);
-      margin-top:2px;
+      margin-top: 2px;
       font-size: 12px;
     }
-    .item .actions{
-      display:flex; gap:8px; align-items:center;
+    .item .actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
     }
-    .iconBtn{
-      width:38px; height:38px;
+    .iconBtn {
+      width: 38px;
+      height: 38px;
       border-radius: 14px;
-      border:1px solid rgba(234,240,255,.14);
-      background: rgba(13,20,40,.45);
+      border: 1px solid rgba(234, 240, 255, 0.14);
+      background: rgba(13, 20, 40, 0.45);
       color: var(--ink);
-      cursor:pointer;
-      transition: transform .18s var(--ease), border-color .18s var(--ease), background .18s var(--ease);
-      display:grid; place-items:center;
+      cursor: pointer;
+      transition: transform 0.18s var(--ease), border-color 0.18s var(--ease),
+        background 0.18s var(--ease);
+      display: grid;
+      place-items: center;
     }
-    .iconBtn:hover{
+    .iconBtn:hover {
       transform: translateY(-1px);
-      border-color: rgba(103,255,154,.35);
-      background: rgba(13,20,40,.62);
+      border-color: rgba(103, 255, 154, 0.35);
+      background: rgba(13, 20, 40, 0.62);
     }
-    .iconBtn:active{transform: translateY(0) scale(.98);}
+    .iconBtn:active {
+      transform: translateY(0) scale(0.98);
+    }
 
     /* Settings form */
-    .form{
-      display:grid;
+    .form {
+      display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
     }
-    @media (max-width: 620px){ .form{grid-template-columns:1fr;} }
-    label{
-      display:block;
-      font-weight:800;
-      font-size: 13px;
-      color: rgba(234,240,255,.92);
-      margin-bottom: 8px;
-      letter-spacing:.25px;
+    @media (max-width: 620px) {
+      .form {
+        grid-template-columns: 1fr;
+      }
     }
-    .field{
+    label {
+      display: block;
+      font-weight: 800;
+      font-size: 13px;
+      color: rgba(234, 240, 255, 0.92);
+      margin-bottom: 8px;
+      letter-spacing: 0.25px;
+    }
+    .field {
       border-radius: 16px;
-      border:1px solid rgba(234,240,255,.14);
-      background: rgba(7,10,15,.22);
+      border: 1px solid rgba(234, 240, 255, 0.14);
+      background: rgba(7, 10, 15, 0.22);
       padding: 10px 12px;
       color: var(--ink);
-      width:100%;
-      outline:none;
-      transition: border-color .18s var(--ease), transform .18s var(--ease);
+      width: 100%;
+      outline: none;
+      transition: border-color 0.18s var(--ease), transform 0.18s var(--ease);
       font-family: var(--body);
       font-weight: 650;
     }
-    .field:focus{
-      border-color: rgba(44,231,211,.45);
+    .field:focus {
+      border-color: rgba(44, 231, 211, 0.45);
       transform: translateY(-1px);
     }
-    .hint{
-      margin-top:8px;
+    .hint {
+      margin-top: 8px;
       color: var(--muted);
       font-size: 12px;
-      line-height:1.5;
+      line-height: 1.5;
     }
-    .stack{display:flex; flex-direction:column;}
-    .wide{grid-column: 1 / -1;}
-    .formActions{
-      display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-top: 10px;
+    .stack {
+      display: flex;
+      flex-direction: column;
+    }
+    .wide {
+      grid-column: 1 / -1;
+    }
+    .formActions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 10px;
     }
 
     /* Footer */
-    footer{
+    footer {
       padding: 24px 0 40px;
       border-top: 1px solid var(--stroke);
-      background: linear-gradient(180deg, rgba(7,10,15,.18), rgba(7,10,15,.44));
+      background: linear-gradient(180deg, rgba(7, 10, 15, 0.18), rgba(7, 10, 15, 0.44));
     }
-    .foot{
-      display:flex; flex-wrap:wrap; gap:14px; align-items:center; justify-content:space-between;
+    .foot {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+      justify-content: space-between;
       color: var(--muted);
     }
-    .foot .tiny{
+    .foot .tiny {
       font-family: var(--mono);
       font-size: 12px;
       color: var(--faint);
     }
 
     /* Reveal motion */
-    .reveal{
-      opacity:0;
+    .reveal {
+      opacity: 0;
       transform: translateY(10px);
       filter: blur(2px);
-      transition: opacity .7s var(--ease), transform .7s var(--ease), filter .7s var(--ease);
+      transition: opacity 0.7s var(--ease), transform 0.7s var(--ease), filter 0.7s var(--ease);
     }
-    .reveal.in{
-      opacity:1;
+    .reveal.in {
+      opacity: 1;
       transform: translateY(0);
       filter: blur(0);
     }
-    .stagger > *{ animation: rise .8s var(--ease) both; }
-    .stagger > *:nth-child(1){animation-delay:.02s}
-    .stagger > *:nth-child(2){animation-delay:.10s}
-    .stagger > *:nth-child(3){animation-delay:.18s}
-    .stagger > *:nth-child(4){animation-delay:.26s}
-    .stagger > *:nth-child(5){animation-delay:.34s}
-    @keyframes rise{
-      from{opacity:0; transform: translateY(10px); filter: blur(3px);}
-      to{opacity:1; transform: translateY(0); filter: blur(0);}
+    .stagger > * {
+      animation: rise 0.8s var(--ease) both;
+    }
+    .stagger > *:nth-child(1) {
+      animation-delay: 0.02s;
+    }
+    .stagger > *:nth-child(2) {
+      animation-delay: 0.1s;
+    }
+    .stagger > *:nth-child(3) {
+      animation-delay: 0.18s;
+    }
+    .stagger > *:nth-child(4) {
+      animation-delay: 0.26s;
+    }
+    .stagger > *:nth-child(5) {
+      animation-delay: 0.34s;
+    }
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+        filter: blur(3px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+      }
     }
 
     /* Toast */
-    .toast{
+    .toast {
       position: fixed;
       left: 50%;
       bottom: 18px;
       transform: translateX(-50%) translateY(12px);
-      opacity:0;
-      pointer-events:none;
+      opacity: 0;
+      pointer-events: none;
       z-index: 80;
       border-radius: 999px;
-      border:1px solid rgba(234,240,255,.16);
-      background: rgba(13,20,40,.72);
+      border: 1px solid rgba(234, 240, 255, 0.16);
+      background: rgba(13, 20, 40, 0.72);
       backdrop-filter: blur(10px);
-      box-shadow: 0 18px 60px rgba(0,0,0,.45);
+      box-shadow: 0 18px 60px rgba(0, 0, 0, 0.45);
       padding: 10px 12px;
       color: var(--ink);
-      display:flex; gap:10px; align-items:center;
-      transition: opacity .25s var(--ease), transform .25s var(--ease);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      transition: opacity 0.25s var(--ease), transform 0.25s var(--ease);
       max-width: min(720px, calc(100% - 24px));
     }
-    .toast.show{
-      opacity:1;
+    .toast.show {
+      opacity: 1;
       transform: translateX(-50%) translateY(0);
     }
-    .toast .tag{
+    .toast .tag {
       font-family: var(--mono);
       font-size: 12px;
       padding: 3px 8px;
       border-radius: 999px;
-      border:1px solid rgba(103,255,154,.35);
-      color: rgba(103,255,154,.95);
-      background: rgba(103,255,154,.10);
-      flex:none;
+      border: 1px solid rgba(103, 255, 154, 0.35);
+      color: rgba(103, 255, 154, 0.95);
+      background: rgba(103, 255, 154, 0.1);
+      flex: none;
     }
-    .toast .msg{
+    .toast .msg {
       font-size: 13px;
-      color: rgba(234,240,255,.92);
-      line-height:1.35;
-      overflow:hidden;
+      color: rgba(234, 240, 255, 0.92);
+      line-height: 1.35;
+      overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
@@ -707,8 +908,8 @@
     #commandsPanel {
       margin-top: 24px;
       border-radius: var(--radius-md);
-      border: 1px solid rgba(103,255,154,.35);
-      background: rgba(13,20,40,.45);
+      border: 1px solid rgba(103, 255, 154, 0.35);
+      background: rgba(13, 20, 40, 0.45);
       padding: 16px;
       font-family: var(--mono);
       font-size: 14px;
@@ -755,7 +956,7 @@
         <span class="mark" aria-hidden="true"></span>
         <span>
           <b>DiscForge</b>
-          <span>OGG + BBMODEL → Music Disc Mod</span>
+          <span>OGG + PNG/JSON → Music Disc Mod</span>
         </span>
       </a>
 
@@ -767,7 +968,9 @@
       </nav>
 
       <div class="navcta">
-        <span class="chip" title="This page generates a ready-to-compile mod template locally in your browser.">offline-ready</span>
+        <span class="chip" title="This page generates a ready-to-compile mod template locally in your browser."
+          >offline-ready</span
+        >
         <button class="btn primary" id="jumpGenerator" type="button" aria-label="Jump to generator">
           <span aria-hidden="true">▸</span> Generate
         </button>
@@ -780,25 +983,50 @@
       <div class="heroGrid">
         <div class="stagger">
           <div class="kicker">
-            <span class="badge"><span class="dot" aria-hidden="true"></span> Forge/Fabric-ready template output</span>
-            <span class="badge"><span class="dot" aria-hidden="true" style="background:linear-gradient(180deg,var(--violet),var(--rose)); box-shadow:0 0 0 3px rgba(169,139,255,.12)"></span> Jukebox + /give + vanilla behavior</span>
+            <span class="badge"
+              ><span class="dot" aria-hidden="true"></span> Forge/Fabric-ready template output</span
+            >
+            <span class="badge"
+              ><span
+                class="dot"
+                aria-hidden="true"
+                style="background: linear-gradient(180deg, var(--violet), var(--rose));
+                box-shadow: 0 0 0 3px rgba(169, 139, 255, 0.12)"
+              ></span
+              > Jukebox + /give + vanilla behavior</span
+            >
           </div>
 
-          <h1>Batch convert <span style="color:rgba(103,255,154,.95)">.ogg</span> + <span style="color:rgba(44,231,211,.95)">.bbmodel</span> into a Minecraft music disc mod.</h1>
+          <h1>
+            Batch convert
+            <span style="color: rgba(103, 255, 154, 0.95)">.ogg</span> +
+            <span style="color: rgba(44, 231, 211, 0.95)">.png/.json</span> into a Minecraft music disc mod.
+          </h1>
           <p class="lede">
-            Drop your audio files (and optional Blockbench models), name your discs, and export a complete mod template:
-            items, sounds, lang entries, and the <span style="color:rgba(234,240,255,.92)">jukebox‑playable</span> music disc behavior.
-            Your discs are obtainable with <code style="font-family:var(--mono)">/give</code> and act like vanilla.
+            Drop your audio files and textures/models, name your discs, and export a complete mod template:
+            items, sounds, lang entries, and the
+            <span style="color: rgba(234, 240, 255, 0.92)">jukebox‑playable</span> music disc behavior.
+            Your discs are obtainable with <code style="font-family: var(--mono)">/give</code> and act like vanilla.
           </p>
 
           <div class="heroActions">
             <button class="btn primary" id="startNow" type="button">
               <span aria-hidden="true">⟡</span> Build mod template
             </button>
-            <button class="btn" id="loadDemo" type="button" title="Populate the generator with example discs (no external files).">
+            <button
+              class="btn"
+              id="loadDemo"
+              type="button"
+              title="Populate the generator with example discs (no external files)."
+            >
               Load demo set
             </button>
-            <button class="btn" id="copyGiveAll" type="button" title="Copies /give commands for all generated discs.">
+            <button
+              class="btn"
+              id="copyGiveAll"
+              type="button"
+              title="Copies /give commands for all generated discs."
+            >
               Copy /give commands
             </button>
           </div>
@@ -821,36 +1049,59 @@
           </div>
 
           <div class="consoleBody">
-            <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Drop files here or choose files">
+            <div
+              class="dropzone"
+              id="dropzone"
+              tabindex="0"
+              role="button"
+              aria-label="Drop files here or choose files"
+            >
               <div class="dzTop">
                 <div>
                   <h3>Drop files</h3>
-                  <p>Drag in many <b>.ogg</b> files (required) and <b>.bbmodel</b> files (optional). We’ll match by filename.</p>
+                  <p>
+                    Drag in many <b>.ogg</b> files (required) and <b>.png</b> and/or <b>.json</b> files (optional).
+                    We’ll match by filename and enforce rules:
+                  </p>
+                  <ul style="color: var(--muted); font-size: 12px; margin: 4px 0 0 18px; padding: 0;">
+                    <li>
+                      If both <code>.png</code> and <code>.json</code> exist for the same base name, an error is logged and that disc is skipped.
+                    </li>
+                    <li>
+                      If only <code>.png</code> exists, a flat item model is generated using that texture.
+                    </li>
+                    <li>
+                      If only <code>.json</code> exists without a matching <code>.png</code>, an error is logged and that disc is skipped.
+                    </li>
+                    <li>
+                      <code>.ogg</code> files are required for each disc.
+                    </li>
+                  </ul>
                 </div>
                 <span class="chip">local</span>
               </div>
 
               <div class="filePills" aria-label="Accepted file types">
                 <span class="pill">audio/*.ogg</span>
-                <span class="pill">model/*.bbmodel</span>
+                <span class="pill">image/*.png</span>
+                <span class="pill">application/json</span>
                 <span class="pill">zip export</span>
               </div>
 
               <div class="dzActions">
-                <label class="btn small" for="filePicker">
-                  Choose files
-                </label>
-                <input id="filePicker" type="file" multiple accept=".ogg,.bbmodel" />
+                <label class="btn small" for="filePicker">Choose files</label>
+                <input id="filePicker" type="file" multiple accept=".ogg,.png,.json" />
                 <button class="btn small" type="button" id="clearFiles">Clear</button>
-                <span class="hint" style="margin:0">Tip: keep names consistent, e.g. <code style="font-family:var(--mono)">calm1.ogg</code> + <code style="font-family:var(--mono)">calm1.bbmodel</code></span>
+                <span class="hint" style="margin: 0">
+                  Tip: keep names consistent, e.g.
+                  <code style="font-family: var(--mono)">calm1.ogg</code> +
+                  <code style="font-family: var(--mono)">calm1.png</code> or
+                  <code style="font-family: var(--mono)">calm1.json</code>
+                </span>
               </div>
             </div>
 
-            <div class="log" id="log" aria-label="Build log">
-              <p class="logLine muted">[ready] Add files to begin. Nothing is uploaded.</p>
-              <p class="logLine muted">[hint] This page generates a template + assets. You still compile the mod in your dev environment.</p>
-              <p class="logLine muted">[note] Music discs are registered as vanilla-like items and will play in a jukebox.</p>
-            </div>
+            <div class="log" id="log" aria-label="Build log" role="log" aria-live="polite"></div>
           </div>
         </aside>
       </div>
@@ -862,26 +1113,43 @@
           <h2>Built for “just like vanilla” behavior</h2>
           <p>
             The output is structured around Minecraft’s standard music disc pattern:
-            an item that points to a sound event, and a sound definition that points to your <code style="font-family:var(--mono)">.ogg</code>.
-            In‑game it behaves like a normal disc: insert into a jukebox, it plays, and it’s obtainable via <code style="font-family:var(--mono)">/give</code>.
+            an item that points to a sound event, and a sound definition that points to your
+            <code style="font-family: var(--mono)">.ogg</code>.
+            In‑game it behaves like a normal disc: insert into a jukebox, it plays, and it’s obtainable via
+            <code style="font-family: var(--mono)">/give</code>.
+            The item model is either your uploaded <code>.json</code> or a generated flat model using your <code>.png</code> texture.
           </p>
         </div>
       </div>
 
       <div class="flow">
         <article class="row">
-          <div style="position:relative">
-            <h3>1) Import audio + optional models</h3>
+          <div style="position: relative">
+            <h3>1) Import audio + textures/models</h3>
             <p>
-              Drop a folder’s worth of <b>.ogg</b>. If you also include <b>.bbmodel</b>, DiscForge will treat it as an optional “disc model source”
-              you can later convert into JSON model files via your preferred pipeline.
-              (The generator will package the raw BBModel alongside the mod template so nothing is lost.)
+              Drop a folder’s worth of <b>.ogg</b> files. Optionally add <b>.png</b> textures and/or <b>.json</b> item models.
+              Rules:
             </p>
+            <ul style="color: var(--muted); font-size: 13px; margin: 4px 0 0 18px; padding: 0;">
+              <li>
+                If both <code>.png</code> and <code>.json</code> exist for the same base name, an error is logged and that disc is skipped.
+              </li>
+              <li>
+                If only <code>.png</code> exists, a flat item model is generated using that texture.
+              </li>
+              <li>
+                If only <code>.json</code> exists without a matching <code>.png</code>, an error is logged and that disc is skipped.
+              </li>
+              <li>
+                <code>.ogg</code> files are required for each disc.
+              </li>
+            </ul>
           </div>
           <aside class="rowAside" aria-label="Naming convention example">
             <pre class="code"><span class="muted"># Recommended naming</span>
 <span class="k">mellow_night</span>.ogg
-<span class="k">mellow_night</span>.bbmodel
+<span class="k">mellow_night</span>.png
+<span class="k">mellow_night</span>.json (optional, but not with .png)
 
 <span class="muted"># Becomes identifiers</span>
 <span class="t">modid</span>:<span class="n">mellow_night</span>
@@ -890,10 +1158,10 @@
         </article>
 
         <article class="row">
-          <div style="position:relative">
+          <div style="position: relative">
             <h3>2) Generate registrations + assets</h3>
             <p>
-              We produce a clean, compile-ready structure: <b>assets</b> (sounds + lang + models) and <b>code stubs</b> (registries)
+              We produce a clean, compile-ready structure: <b>assets</b> (sounds + lang + models + textures) and <b>code stubs</b> (registries)
               for either Forge or Fabric style projects. You pick the mod ID, namespace, and a consistent naming scheme.
             </p>
           </div>
@@ -910,11 +1178,11 @@
         </article>
 
         <article class="row">
-          <div style="position:relative">
+          <div style="position: relative">
             <h3>3) Use /give + play in jukebox</h3>
             <p>
               Each disc item gets a stable identifier, so you can spawn it instantly:
-              <code style="font-family:var(--mono)">/give @p &lt;modid&gt;:&lt;disc_id&gt;</code>.
+              <code style="font-family: var(--mono)">/give @p &lt;modid&gt;:&lt;disc_id&gt;</code>.
               Once in your inventory, it’s a standard music disc item: insert into a jukebox and it plays your <b>.ogg</b>.
             </p>
           </div>
@@ -946,17 +1214,22 @@
         <div class="panel" aria-label="Disc list panel">
           <div class="panelHead">
             <h3>Discs</h3>
-            <div style="display:flex; gap:10px; align-items:center;">
+            <div style="display: flex; gap: 10px; align-items: center">
               <span class="chip" id="countChip">0 discs</span>
-              <button class="btn small" id="autoName" type="button" title="Normalize names into safe identifiers.">Normalize IDs</button>
+              <button class="btn small" id="autoName" type="button" title="Normalize names into safe identifiers">
+                Normalize IDs
+              </button>
             </div>
           </div>
           <div class="panelBody">
-            <div class="hint" style="margin-top:0">
-              Files are matched by base name. Example: <code style="font-family:var(--mono)">track01.ogg</code> pairs with <code style="font-family:var(--mono)">track01.bbmodel</code>.
+            <div class="hint" style="margin-top: 0">
+              Files are matched by base name. Example:
+              <code style="font-family: var(--mono)">track01.ogg</code> pairs with
+              <code style="font-family: var(--mono)">track01.png</code> or
+              <code style="font-family: var(--mono)">track01.json</code>.
               You can edit titles below—IDs stay stable unless you normalize.
             </div>
-            <div class="list" id="discList" style="margin-top:12px" aria-label="Generated discs list">
+            <div class="list" id="discList" style="margin-top: 12px" aria-label="Generated discs list">
               <!-- items injected -->
             </div>
           </div>
@@ -971,13 +1244,30 @@
             <form class="form" id="settingsForm">
               <div class="stack">
                 <label for="modid">Mod ID</label>
-                <input class="field" id="modid" name="modid" value="discforge" autocomplete="off" />
-                <div class="hint">Lowercase, no spaces. Used as namespace: <code style="font-family:var(--mono)">&lt;modid&gt;:&lt;item&gt;</code></div>
+                <input
+                  class="field"
+                  id="modid"
+                  name="modid"
+                  value="discforge"
+                  autocomplete="off"
+                  spellcheck="false"
+                />
+                <div class="hint">
+                  Lowercase, no spaces. Used as namespace:
+                  <code style="font-family: var(--mono)">&lt;modid&gt;:&lt;item&gt;</code>
+                </div>
               </div>
 
               <div class="stack">
                 <label for="packageName">Java package (optional)</label>
-                <input class="field" id="packageName" name="packageName" value="com.example.discforge" autocomplete="off" />
+                <input
+                  class="field"
+                  id="packageName"
+                  name="packageName"
+                  value="com.example.discforge"
+                  autocomplete="off"
+                  spellcheck="false"
+                />
                 <div class="hint">Used in generated stubs (you can change later).</div>
               </div>
 
@@ -992,30 +1282,41 @@
 
               <div class="stack">
                 <label for="mcVersion">Minecraft version</label>
-                <input class="field" id="mcVersion" name="mcVersion" value="1.20.1" autocomplete="off" />
+                <input
+                  class="field"
+                  id="mcVersion"
+                  name="mcVersion"
+                  value="1.20.1"
+                  autocomplete="off"
+                  spellcheck="false"
+                />
                 <div class="hint">For README hints and folder naming guidance.</div>
               </div>
 
               <div class="stack wide">
                 <label for="discPrefix">Sound path prefix</label>
-                <input class="field" id="discPrefix" name="discPrefix" value="records/" autocomplete="off" />
-                <div class="hint">Your .ogg files will be placed under <code style="font-family:var(--mono)">assets/&lt;modid&gt;/sounds/&lt;prefix&gt;</code>.</div>
+                <input
+                  class="field"
+                  id="discPrefix"
+                  name="discPrefix"
+                  value="records/"
+                  autocomplete="off"
+                  spellcheck="false"
+                />
+                <div class="hint">
+                  Your .ogg files will be placed under
+                  <code style="font-family: var(--mono)">assets/&lt;modid&gt;/sounds/&lt;prefix&gt;</code>.
+                </div>
               </div>
 
               <div class="formActions wide">
-                <button class="btn primary" id="exportZip" type="button">
-                  Export ZIP
-                </button>
-                <button class="btn" id="previewJson" type="button">
-                  Preview output
-                </button>
-                <button class="btn" id="copySoundsJson" type="button">
-                  Copy sounds.json
-                </button>
+                <button class="btn primary" id="exportZip" type="button">Export ZIP</button>
+                <button class="btn" id="previewJson" type="button">Preview output</button>
+                <button class="btn" id="copySoundsJson" type="button">Copy sounds.json</button>
               </div>
 
               <div class="hint wide" id="exportHint">
-                Export includes: <b>assets</b> tree, <b>sounds.json</b>, <b>en_us.json</b>, item model JSONs, and registry stubs.
+                Export includes: <b>assets</b> tree, <b>sounds.json</b>, <b>en_us.json</b>, item model JSONs, textures, and registry stubs.
                 (You still need to compile the mod in your IDE.)
               </div>
             </form>
@@ -1023,8 +1324,13 @@
         </div>
       </div>
 
-      <!-- New commands output panel -->
-      <div id="commandsPanel" role="region" aria-live="polite" aria-label="Minecraft /give commands for generated discs">
+      <!-- Commands output panel -->
+      <div
+        id="commandsPanel"
+        role="region"
+        aria-live="polite"
+        aria-label="Minecraft /give commands for generated discs"
+      >
         <h3>Generated Minecraft /give commands</h3>
         <button id="copyCommandsBtn" type="button" aria-label="Copy all /give commands">Copy All</button>
         <pre id="commandsText"></pre>
@@ -1044,13 +1350,15 @@
 
       <div class="flow">
         <article class="row">
-          <div style="position:relative">
+          <div style="position: relative">
             <h3>Assets tree (ready)</h3>
             <p>
-              Includes: <code style="font-family:var(--mono)">assets/&lt;modid&gt;/sounds.json</code>,
-              <code style="font-family:var(--mono)">assets/&lt;modid&gt;/sounds/…</code> (<b>.ogg</b>),
-              <code style="font-family:var(--mono)">assets/&lt;modid&gt;/lang/en_us.json</code>,
-              and item models under <code style="font-family:var(--mono)">assets/&lt;modid&gt;/models/item/</code>.
+              Includes:
+              <code style="font-family: var(--mono)">assets/&lt;modid&gt;/sounds.json</code>,
+              <code style="font-family: var(--mono)">assets/&lt;modid&gt;/sounds/…</code> (<b>.ogg</b>),
+              <code style="font-family: var(--mono)">assets/&lt;modid&gt;/lang/en_us.json</code>,
+              <code style="font-family: var(--mono)">assets/&lt;modid&gt;/models/item/</code> (<b>.json</b>),
+              <code style="font-family: var(--mono)">assets/&lt;modid&gt;/textures/item/</code> (<b>.png</b>)
             </p>
           </div>
           <aside class="rowAside" aria-label="Tree preview">
@@ -1059,12 +1367,13 @@
     <span class="k">lang</span>/en_us.json
     <span class="k">models</span>/item/<span class="n">&lt;disc_id&gt;</span>.json
     <span class="k">sounds</span>/<span class="n">records/</span><span class="n">&lt;disc_id&gt;</span>.ogg
+    <span class="k">textures</span>/item/<span class="n">&lt;disc_id&gt;</span>.png
     sounds.json</pre>
           </aside>
         </article>
 
         <article class="row">
-          <div style="position:relative">
+          <div style="position: relative">
             <h3>Give commands (stable)</h3>
             <p>
               Every generated disc is an item you can spawn instantly. Great for testing:
@@ -1082,7 +1391,7 @@
         </article>
 
         <article class="row">
-          <div style="position:relative">
+          <div style="position: relative">
             <h3>Registry stubs (minimal)</h3>
             <p>
               We generate small, readable registration code: item registration, sound event keys, and a “music disc item” definition pointing to your sound.
@@ -1114,7 +1423,7 @@ registerItem(<span class="t">modid</span>:<span class="n">mellow_night</span>,
 
       <div class="flow">
         <article class="row">
-          <div style="position:relative">
+          <div style="position: relative">
             <h3>Will the discs work in a jukebox?</h3>
             <p>
               Yes—when you compile the generated template into a mod, each disc is registered as a music disc item pointing to its sound event.
@@ -1131,24 +1440,25 @@ registerItem(<span class="t">modid</span>:<span class="n">mellow_night</span>,
         </article>
 
         <article class="row">
-          <div style="position:relative">
-            <h3>What about .bbmodel?</h3>
+          <div style="position: relative">
+            <h3>What about .png/.json?</h3>
             <p>
-              This generator packages BBModel files and creates item model JSON stubs.
-              Converting BBModel → Minecraft JSON varies by workflow, so DiscForge doesn’t pretend to “magically” convert models.
-              It keeps the pipeline honest while still batching everything into one export.
+              This generator packages PNG textures and JSON item models.
+              If you upload both PNG and JSON for the same disc, it logs an error and skips that disc.
+              If you upload only PNG, it generates a flat item model JSON referencing that PNG.
+              If you upload only JSON without PNG, it logs an error and skips that disc.
             </p>
           </div>
           <aside class="rowAside">
             <pre class="code"><span class="muted">Suggested workflow:</span>
-1) Export BBModel → mc item model JSON
-2) Replace generated model stubs
-3) Keep IDs the same</pre>
+1) Upload .ogg + .png for each disc (recommended)
+2) Optionally upload .json if you want a custom model (but not with .png)
+3) Export and compile your mod</pre>
           </aside>
         </article>
 
         <article class="row">
-          <div style="position:relative">
+          <div style="position: relative">
             <h3>Do you upload my files?</h3>
             <p>
               No. All processing happens locally in your browser session. The ZIP is generated client-side.
@@ -1168,57 +1478,72 @@ registerItem(<span class="t">modid</span>:<span class="n">mellow_night</span>,
   <footer>
     <div class="wrap foot">
       <div>
-        <div style="display:flex; gap:10px; align-items:center;">
-          <span class="mark" aria-hidden="true" style="width:30px;height:30px;border-radius:10px;"></span>
+        <div style="display: flex; gap: 10px; align-items: center">
+          <span class="mark" aria-hidden="true" style="width: 30px; height: 30px; border-radius: 10px"></span>
           <div>
-            <div style="font-family:var(--display); font-weight:800; letter-spacing:-.2px;">DiscForge</div>
-            <div class="tiny">Generate a Minecraft music disc mod template from .ogg and .bbmodel.</div>
+            <div style="font-family: var(--display); font-weight: 800; letter-spacing: -0.2px">
+              DiscForge
+            </div>
+            <div class="tiny">Generate a Minecraft music disc mod template from .ogg and .png/.json.</div>
           </div>
         </div>
       </div>
-      <div class="tiny">Tip: keep filenames clean → stable IDs → stable <code style="font-family:var(--mono)">/give</code> commands.</div>
+      <div class="tiny">
+        Tip: keep filenames clean → stable IDs → stable
+        <code style="font-family: var(--mono)">/give</code> commands.
+      </div>
     </div>
   </footer>
 
-  <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true">
+  <div
+    class="toast"
+    id="toast"
+    role="status"
+    aria-live="polite"
+    aria-atomic="true"
+  >
     <span class="tag">copied</span>
     <span class="msg" id="toastMsg">Text copied to clipboard.</span>
   </div>
 
   <script>
     // ---------- Utilities ----------
-    const $ = (sel, root=document) => root.querySelector(sel);
-    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+    const $ = (sel, root = document) => root.querySelector(sel);
+    const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-    function clampStr(v, max=140){
+    function clampStr(v, max = 140) {
       const s = String(v ?? "");
-      return s.length > max ? s.slice(0, max-1) + "…" : s;
+      return s.length > max ? s.slice(0, max - 1) + "…" : s;
     }
 
-    function slugify(input){
+    function slugify(input) {
       // Minecraft-ish resource location safe: lowercase, numbers, underscore, slash, dot allowed (we'll keep underscore only for item IDs)
-      return String(input ?? "")
-        .trim()
-        .toLowerCase()
-        .replace(/\.[^/.]+$/,"")         // remove extension
-        .replace(/['"]/g,"")
-        .replace(/[^a-z0-9]+/g,"_")
-        .replace(/^_+|_+$/g,"")
-        .replace(/__+/g,"_")
-        .slice(0, 64) || "disc";
+      return (
+        String(input ?? "")
+          .trim()
+          .toLowerCase()
+          .replace(/\.[^/.]+$/, "") // remove extension
+          .replace(/['"]/g, "")
+          .replace(/[^a-z0-9]+/g, "_")
+          .replace(/^_+|_+$/g, "")
+          .replace(/__+/g, "_")
+          .slice(0, 64) || "disc"
+      );
     }
 
-    function safeModId(input){
-      return String(input ?? "")
-        .trim()
-        .toLowerCase()
-        .replace(/[^a-z0-9_\-]/g,"_")
-        .replace(/^_+|_+$/g,"")
-        .replace(/__+/g,"_")
-        .slice(0, 64) || "modid";
+    function safeModId(input) {
+      return (
+        String(input ?? "")
+          .trim()
+          .toLowerCase()
+          .replace(/[^a-z0-9_\-]/g, "_")
+          .replace(/^_+|_+$/g, "")
+          .replace(/__+/g, "_")
+          .slice(0, 64) || "modid"
+      );
     }
 
-    function toast(msg){
+    function toast(msg) {
       const t = $("#toast");
       $("#toastMsg").textContent = msg;
       t.classList.add("show");
@@ -1226,11 +1551,11 @@ registerItem(<span class="t">modid</span>:<span class="n">mellow_night</span>,
       toast._timer = setTimeout(() => t.classList.remove("show"), 2200);
     }
 
-    async function copyText(text){
-      try{
+    async function copyText(text) {
+      try {
         await navigator.clipboard.writeText(text);
         toast("Copied to clipboard.");
-      }catch(e){
+      } catch (e) {
         // Fallback
         const ta = document.createElement("textarea");
         ta.value = text;
@@ -1244,7 +1569,7 @@ registerItem(<span class="t">modid</span>:<span class="n">mellow_night</span>,
       }
     }
 
-    function logLine(text, cls="muted"){
+    function logLine(text, cls = "muted") {
       const log = $("#log");
       const p = document.createElement("p");
       p.className = "logLine " + cls;
@@ -1255,9 +1580,10 @@ registerItem(<span class="t">modid</span>:<span class="n">mellow_night</span>,
 
     // ---------- State ----------
     const state = {
-      ogg: new Map(),      // base -> File
-      bbmodel: new Map(),  // base -> File
-      discs: [],           // {id, title, oggFileName, bbmodelFileName?}
+      ogg: new Map(), // base -> File
+      png: new Map(), // base -> File
+      json: new Map(), // base -> File
+      discs: [], // {id, title, oggFileName, pngFileName?, jsonFileName?, skip:boolean}
     };
 
     // ---------- DOM refs ----------
@@ -1277,31 +1603,41 @@ registerItem(<span class="t">modid</span>:<span class="n">mellow_night</span>,
     const copyCommandsBtn = $("#copyCommandsBtn");
 
     // ---------- Reveal on scroll ----------
-    const io = new IntersectionObserver(entries=>{
-      for (const e of entries){
-        if (e.isIntersecting) e.target.classList.add("in");
-      }
-    }, {threshold: .12});
-    $$(".reveal").forEach(el=>io.observe(el));
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) e.target.classList.add("in");
+        }
+      },
+      { threshold: 0.12 }
+    );
+    $$(".reveal").forEach((el) => io.observe(el));
 
     // ---------- File intake ----------
-    function ingestFiles(fileList){
+    function ingestFiles(fileList) {
       const files = Array.from(fileList || []);
       if (!files.length) return;
 
-      let addedOgg = 0, addedBb = 0, ignored = 0;
+      let addedOgg = 0,
+        addedPng = 0,
+        addedJson = 0,
+        ignored = 0;
 
-      for (const f of files){
+      for (const f of files) {
         const name = f.name || "";
         const lower = name.toLowerCase();
-        if (lower.endsWith(".ogg")){
-          const base = name.replace(/\.ogg$/i,"");
+        if (lower.endsWith(".ogg")) {
+          const base = name.replace(/\.ogg$/i, "");
           state.ogg.set(base, f);
           addedOgg++;
-        } else if (lower.endsWith(".bbmodel")){
-          const base = name.replace(/\.bbmodel$/i,"");
-          state.bbmodel.set(base, f);
-          addedBb++;
+        } else if (lower.endsWith(".png")) {
+          const base = name.replace(/\.png$/i, "");
+          state.png.set(base, f);
+          addedPng++;
+        } else if (lower.endsWith(".json")) {
+          const base = name.replace(/\.json$/i, "");
+          state.json.set(base, f);
+          addedJson++;
         } else {
           ignored++;
         }
@@ -1310,63 +1646,116 @@ registerItem(<span class="t">modid</span>:<span class="n">mellow_night</span>,
       buildDiscsFromMaps();
       renderDiscs();
 
-      logLine(`[import] +${addedOgg} .ogg, +${addedBb} .bbmodel${ignored?`, ignored ${ignored}`:""}`, "ok");
-      if (addedBb && !addedOgg) logLine(`[warn] You added models but no .ogg. Discs require audio.`, "warn");
-      if (addedOgg) logLine(`[hint] Pairing rule: "name.ogg" matches "name.bbmodel".`, "muted");
+      logLine(
+        `[import] +${addedOgg} .ogg, +${addedPng} .png, +${addedJson} .json${
+          ignored ? `, ignored ${ignored}` : ""
+        }`,
+        "ok"
+      );
+      if (addedOgg === 0) logLine(`[err] No .ogg files imported. Discs require audio.`, "err");
+      if (addedPng === 0 && addedJson > 0)
+        logLine(
+          `[warn] You added .json files but no .png files. .json without .png will cause errors.`,
+          "warn"
+        );
+      if (addedPng > 0 && addedJson > 0)
+        logLine(
+          `[hint] Discs with both .png and .json for the same base name will be skipped with error.`,
+          "muted"
+        );
     }
 
-    function buildDiscsFromMaps(){
-      // Discs are driven by .ogg files. bbmodel is optional.
-      const bases = Array.from(state.ogg.keys()).sort((a,b)=>a.localeCompare(b));
-      state.discs = bases.map(base=>{
+    function buildDiscsFromMaps() {
+      // Discs are driven by .ogg files.
+      const bases = Array.from(state.ogg.keys()).sort((a, b) => a.localeCompare(b));
+      state.discs = [];
+
+      for (const base of bases) {
+        const hasPng = state.png.has(base);
+        const hasJson = state.json.has(base);
+        const oggFile = state.ogg.get(base);
+
+        let skip = false;
+
+        // Error if both png and json exist for same base
+        if (hasPng && hasJson) {
+          logLine(
+            `[err] Conflict for "${base}": both .png and .json exist. Skipping this disc.`,
+            "err"
+          );
+          skip = true;
+        }
+        // Error if json exists but no png (texture missing)
+        else if (!hasPng && hasJson) {
+          logLine(
+            `[err] Missing .png for "${base}" but .json exists. Skipping this disc.`,
+            "err"
+          );
+          skip = true;
+        }
+        // Warn if no png or json (no texture/model)
+        else if (!hasPng && !hasJson) {
+          logLine(
+            `[warn] No .png or .json found for "${base}". Disc will use default flat texture.`,
+            "warn"
+          );
+        }
+
         const id = slugify(base);
         const title = base
-          .replace(/[_\-]+/g," ")
-          .replace(/\s+/g," ")
+          .replace(/[_\-]+/g, " ")
+          .replace(/\s+/g, " ")
           .trim()
-          .replace(/\b\w/g, m => m.toUpperCase());
-        const ogg = state.ogg.get(base);
-        const bb = state.bbmodel.get(base);
-        return {
+          .replace(/\b\w/g, (m) => m.toUpperCase());
+
+        state.discs.push({
           base,
           id,
           title: title || id,
-          oggFileName: ogg?.name || `${base}.ogg`,
-          bbmodelFileName: bb?.name || null
-        };
-      });
+          oggFileName: oggFile?.name || `${base}.ogg`,
+          pngFileName: hasPng ? state.png.get(base).name : null,
+          jsonFileName: hasJson ? state.json.get(base).name : null,
+          skip,
+        });
+      }
     }
 
-    function renderDiscs(){
+    function renderDiscs() {
       discList.innerHTML = "";
-      const n = state.discs.length;
-      countChip.textContent = `${n} disc${n===1?"":"s"}`;
+      const validDiscs = state.discs.filter((d) => !d.skip);
+      const n = validDiscs.length;
+      countChip.textContent = `${n} disc${n === 1 ? "" : "s"}`;
 
-      if (!n){
+      if (!n) {
         const empty = document.createElement("div");
         empty.className = "hint";
         empty.style.marginTop = "6px";
-        empty.innerHTML = `No discs yet. Add <code style="font-family:var(--mono)">.ogg</code> files to populate the list.`;
+        empty.innerHTML = `No valid discs yet. Add <code style="font-family:var(--mono)">.ogg</code> files with matching <code>.png</code> or <code>.json</code> files to populate the list.`;
         discList.appendChild(empty);
         return;
       }
 
-      for (const disc of state.discs){
+      for (const disc of state.discs) {
         const row = document.createElement("div");
         row.className = "item";
+        if (disc.skip) row.style.opacity = "0.5";
         row.dataset.id = disc.id;
 
         const icon = document.createElement("div");
         icon.className = "discIcon";
-        icon.setAttribute("aria-hidden","true");
+        icon.setAttribute("aria-hidden", "true");
 
         const main = document.createElement("div");
         const title = document.createElement("b");
         title.textContent = disc.title;
 
         const meta = document.createElement("small");
-        const bb = disc.bbmodelFileName ? ` + ${disc.bbmodelFileName}` : "";
-        meta.textContent = `${disc.id} • ${disc.oggFileName}${bb}`;
+        let metaText = `${disc.id} • ${disc.oggFileName}`;
+        if (disc.pngFileName) metaText += ` + ${disc.pngFileName}`;
+        if (disc.jsonFileName) metaText += ` + ${disc.jsonFileName}`;
+        if (disc.skip) metaText += " (skipped)";
+        meta.textContent = metaText;
+
         main.appendChild(title);
         main.appendChild(meta);
 
@@ -1382,7 +1771,11 @@ registerItem(<span class="t">modid</span>:<span class="n">mellow_night</span>,
           <path d="M8 7a3 3 0 0 1 3-3h7a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3h-7a3 3 0 0 1-3-3V7Z" stroke="rgba(234,240,255,.85)" stroke-width="1.7"/>
           <path d="M6 20H5a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3h1" stroke="rgba(103,255,154,.85)" stroke-width="1.7" stroke-linecap="round"/>
         </svg>`;
-        btnGive.addEventListener("click", ()=>{
+        btnGive.addEventListener("click", () => {
+          if (disc.skip) {
+            toast("Cannot give skipped disc.");
+            return;
+          }
           const modid = safeModId(modidEl.value);
           copyText(`/give @p ${modid}:${disc.id}`);
         });
@@ -1396,17 +1789,24 @@ registerItem(<span class="t">modid</span>:<span class="n">mellow_night</span>,
           <path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0 0-3L16.5 4a2.1 2.1 0 0 0-3 0L3 14.5V20Z" stroke="rgba(234,240,255,.85)" stroke-width="1.7" stroke-linejoin="round"/>
           <path d="M12.5 6.5 17.5 11.5" stroke="rgba(44,231,211,.9)" stroke-width="1.7" stroke-linecap="round"/>
         </svg>`;
-        btnEdit.addEventListener("click", ()=>{
+        btnEdit.addEventListener("click", () => {
+          if (disc.skip) {
+            toast("Cannot edit skipped disc.");
+            return;
+          }
           const newTitle = prompt("Disc title (display name):", disc.title);
-          if (newTitle !== null){
+          if (newTitle !== null) {
             disc.title = newTitle.trim() || disc.title;
           }
           const newId = prompt("Disc ID (resource location path):", disc.id);
-          if (newId !== null){
+          if (newId !== null) {
             disc.id = slugify(newId);
           }
           renderDiscs();
-          logLine(`[edit] ${disc.base} → id="${disc.id}", title="${clampStr(disc.title, 40)}"`, "ok");
+          logLine(
+            `[edit] ${disc.base} → id="${disc.id}", title="${clampStr(disc.title, 40)}"`,
+            "ok"
+          );
         });
 
         actions.appendChild(btnGive);
@@ -1420,36 +1820,37 @@ registerItem(<span class="t">modid</span>:<span class="n">mellow_night</span>,
     }
 
     // Drag & drop behavior
-    function setDrag(on){
+    function setDrag(on) {
       dropzone.classList.toggle("isDrag", !!on);
     }
-    ["dragenter","dragover"].forEach(evt=>{
-      dropzone.addEventListener(evt, (e)=>{
+    ["dragenter", "dragover"].forEach((evt) => {
+      dropzone.addEventListener(evt, (e) => {
         e.preventDefault();
         setDrag(true);
       });
     });
-    ["dragleave","drop"].forEach(evt=>{
-      dropzone.addEventListener(evt, (e)=>{
+    ["dragleave", "drop"].forEach((evt) => {
+      dropzone.addEventListener(evt, (e) => {
         e.preventDefault();
         setDrag(false);
       });
     });
-    dropzone.addEventListener("drop", (e)=>{
+    dropzone.addEventListener("drop", (e) => {
       ingestFiles(e.dataTransfer.files);
     });
-    dropzone.addEventListener("keydown", (e)=>{
-      if (e.key === "Enter" || e.key === " "){
+    dropzone.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         filePicker.click();
       }
     });
-    dropzone.addEventListener("click", ()=> filePicker.click());
-    filePicker.addEventListener("change", ()=> ingestFiles(filePicker.files));
+    dropzone.addEventListener("click", () => filePicker.click());
+    filePicker.addEventListener("change", () => ingestFiles(filePicker.files));
 
-    $("#clearFiles").addEventListener("click", ()=>{
+    $("#clearFiles").addEventListener("click", () => {
       state.ogg.clear();
-      state.bbmodel.clear();
+      state.png.clear();
+      state.json.clear();
       state.discs = [];
       renderDiscs();
       commandsPanel.style.display = "none";
@@ -1458,37 +1859,53 @@ registerItem(<span class="t">modid</span>:<span class="n">mellow_night</span>,
     });
 
     // ---------- Output generation ----------
-    function buildSoundsJson(modid){
+    function buildSoundsJson(modid) {
       const obj = {};
-      for (const d of state.discs){
+      for (const d of state.discs) {
+        if (d.skip) continue;
         obj[`music_disc.${d.id}`] = { sounds: [`${prefixEl.value || "records/"}${d.id}`] };
       }
       return JSON.stringify(obj, null, 2) + "\n";
     }
 
-    function buildLangJson(modid){
+    function buildLangJson(modid) {
       const obj = {};
-      for (const d of state.discs){
+      for (const d of state.discs) {
+        if (d.skip) continue;
         obj[`item.${modid}.${d.id}`] = d.title;
       }
       return JSON.stringify(obj, null, 2) + "\n";
     }
 
-    function buildItemModelJson(modid, discId){
-      // Simple generated stub; user can replace with custom model later.
-      return JSON.stringify({
-        "parent":"item/generated",
-        "textures":{
-          "layer0": `${modid}:item/${discId}`
-        }
-      }, null, 2) + "\n";
+    function buildItemModelJson(modid, disc) {
+      // If disc has a .json file, we will use the uploaded JSON file content (handled in export)
+      // If no .json but has .png, generate flat item model JSON referencing the png texture
+      if (disc.jsonFileName) {
+        // Placeholder: actual JSON content will be from uploaded file
+        return null;
+      }
+      // Generate flat item model JSON
+      return JSON.stringify(
+        {
+          parent: "item/generated",
+          textures: {
+            layer0: `${modid}:item/${disc.id}`,
+          },
+        },
+        null,
+        2
+      ) + "\n";
     }
 
-    function buildReadme(modid){
+    function buildReadme(modid) {
       const platform = platformEl.value;
       const mc = mcVerEl.value.trim() || "1.xx";
       const pkg = packageEl.value.trim() || "(your.package.here)";
-      const giveLines = state.discs.slice(0, 10).map(d => `/give @p ${modid}:${d.id}`).join("\n");
+      const giveLines = state.discs
+        .filter((d) => !d.skip)
+        .slice(0, 10)
+        .map((d) => `/give @p ${modid}:${d.id}`)
+        .join("\n");
 
       return `# ${modid} — Music Disc Pack (generated)
 
@@ -1500,6 +1917,7 @@ This export contains:
 - assets/${modid}/sounds/${prefixEl.value || "records/"}*.ogg
 - assets/${modid}/lang/en_us.json
 - assets/${modid}/models/item/*.json
+- assets/${modid}/textures/item/*.png
 - stubs/ (registration examples)
 
 ## Jukebox behavior
@@ -1519,13 +1937,11 @@ Package hint for code stubs: ${pkg}
 `;
     }
 
-    function buildStubs(modid){
+    function buildStubs(modid) {
       const pkg = packageEl.value.trim() || "com.example.mod";
-      const discs = state.discs;
+      const discs = state.discs.filter((d) => !d.skip);
       const platform = platformEl.value;
 
-      // These are intentionally "stubs": compile-ready depends on your project mappings / loader version.
-      // We keep them minimal and readable.
       const commonHeader = `// Generated by DiscForge — minimal registration stubs
 // ModID: ${modid}
 // NOTE: Integrate into your existing registries / initializer patterns.
@@ -1534,10 +1950,9 @@ Package hint for code stubs: ${pkg}
       let fileName = "";
       let content = "";
 
-      if (platform === "fabric"){
+      if (platform === "fabric") {
         fileName = `stubs/${modid}/DiscforgeRegistry_FABRIC.java`;
-        content =
-`${commonHeader}
+        content = `${commonHeader}
 package ${pkg};
 
 public final class DiscforgeRegistry_FABRIC {
@@ -1547,7 +1962,12 @@ public final class DiscforgeRegistry_FABRIC {
   // - Register Items: ${modid}:<id> as MusicDiscItem pointing to that SoundEvent
 
   public static void registerAll() {
-${discs.map(d => `    // registerSound("${modid}:music_disc.${d.id}");\n    // registerItem("${modid}:${d.id}", /* new MusicDiscItem(sound=music_disc.${d.id}) */);\n`).join("\n")}
+${discs
+  .map(
+    (d) =>
+      `    // registerSound("${modid}:music_disc.${d.id}");\n    // registerItem("${modid}:${d.id}", /* new MusicDiscItem(sound=music_disc.${d.id}) */);\n`
+  )
+  .join("\n")}
   }
 
   private DiscforgeRegistry_FABRIC() {}
@@ -1555,8 +1975,7 @@ ${discs.map(d => `    // registerSound("${modid}:music_disc.${d.id}");\n    // r
 `;
       } else {
         fileName = `stubs/${modid}/DiscforgeRegistry_FORGE.java`;
-        content =
-`${commonHeader}
+        content = `${commonHeader}
 package ${pkg};
 
 public final class DiscforgeRegistry_FORGE {
@@ -1566,7 +1985,12 @@ public final class DiscforgeRegistry_FORGE {
   // - DeferredRegister<Item> : ${modid}:<id> as RecordItem/MusicDiscItem
 
   public static void registerAll() {
-${discs.map(d => `    // SOUND_EVENTS.register("music_disc.${d.id}", () -> new SoundEvent(new ResourceLocation("${modid}", "music_disc.${d.id}")));\n    // ITEMS.register("${d.id}", () -> new RecordItem(/* comparator */1, /* sound */ MUSIC_DISC_${d.id.toUpperCase()}, new Item.Properties().stacksTo(1), /* length */ 180));\n`).join("\n")}
+${discs
+  .map(
+    (d) =>
+      `    // SOUND_EVENTS.register("music_disc.${d.id}", () -> new SoundEvent(new ResourceLocation("${modid}", "music_disc.${d.id}")));\n    // ITEMS.register("${d.id}", () -> new RecordItem(/* comparator */1, /* sound */ MUSIC_DISC_${d.id.toUpperCase()}, new Item.Properties().stacksTo(1), /* length */ 180));\n`
+  )
+  .join("\n")}
   }
 
   private DiscforgeRegistry_FORGE() {}
@@ -1580,54 +2004,63 @@ ${discs.map(d => `    // SOUND_EVENTS.register("music_disc.${d.id}", () -> new S
     // ---------- Minimal ZIP writer (store only) ----------
     // No external libs. Produces a simple ZIP with "stored" entries (no compression).
     // Enough for production-grade downloads in modern browsers.
-    function crc32(buf){
-      let c = 0xFFFFFFFF;
-      for (let i=0;i<buf.length;i++){
-        c = (c >>> 8) ^ CRC_TABLE[(c ^ buf[i]) & 0xFF];
+    function crc32(buf) {
+      let c = 0xffffffff;
+      for (let i = 0; i < buf.length; i++) {
+        c = (c >>> 8) ^ CRC_TABLE[(c ^ buf[i]) & 0xff];
       }
-      return (c ^ 0xFFFFFFFF) >>> 0;
+      return (c ^ 0xffffffff) >>> 0;
     }
     const CRC_TABLE = (() => {
       const table = new Uint32Array(256);
-      for (let i=0;i<256;i++){
+      for (let i = 0; i < 256; i++) {
         let c = i;
-        for (let k=0;k<8;k++){
-          c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+        for (let k = 0; k < 8; k++) {
+          c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
         }
         table[i] = c >>> 0;
       }
       return table;
     })();
 
-    function encodeUTF8(str){
+    function encodeUTF8(str) {
       return new TextEncoder().encode(str);
     }
-    function dosTimeDate(date=new Date()){
-      let time = 0, d = 0;
-      let sec = Math.floor(date.getSeconds()/2);
+    function dosTimeDate(date = new Date()) {
+      let time = 0,
+        d = 0;
+      let sec = Math.floor(date.getSeconds() / 2);
       let min = date.getMinutes();
       let hour = date.getHours();
-      time = (hour<<11) | (min<<5) | sec;
+      time = (hour << 11) | (min << 5) | sec;
       let day = date.getDate();
-      let month = date.getMonth()+1;
+      let month = date.getMonth() + 1;
       let year = date.getFullYear();
-      d = ((year-1980)<<9) | (month<<5) | day;
-      return {time, date:d};
+      d = ((year - 1980) << 9) | (month << 5) | day;
+      return { time, date: d };
     }
-    function u16(n){ const a = new Uint8Array(2); new DataView(a.buffer).setUint16(0,n,true); return a; }
-    function u32(n){ const a = new Uint8Array(4); new DataView(a.buffer).setUint32(0,n,true); return a; }
+    function u16(n) {
+      const a = new Uint8Array(2);
+      new DataView(a.buffer).setUint16(0, n, true);
+      return a;
+    }
+    function u32(n) {
+      const a = new Uint8Array(4);
+      new DataView(a.buffer).setUint32(0, n, true);
+      return a;
+    }
 
-    async function makeZip(entries){
+    async function makeZip(entries) {
       // entries: {path, data: Uint8Array|ArrayBuffer|string|Blob|File}
       const files = [];
-      for (const e of entries){
+      for (const e of entries) {
         let data;
         if (typeof e.data === "string") data = encodeUTF8(e.data);
         else if (e.data instanceof Uint8Array) data = e.data;
         else if (e.data instanceof ArrayBuffer) data = new Uint8Array(e.data);
         else if (e.data instanceof Blob) data = new Uint8Array(await e.data.arrayBuffer());
         else data = encodeUTF8(String(e.data));
-        files.push({path: e.path.replace(/\\/g,"/"), data});
+        files.push({ path: e.path.replace(/\\/g, "/"), data });
       }
 
       const now = dosTimeDate(new Date());
@@ -1635,7 +2068,7 @@ ${discs.map(d => `    // SOUND_EVENTS.register("music_disc.${d.id}", () -> new S
       const fileParts = [];
       const centralParts = [];
 
-      for (const f of files){
+      for (const f of files) {
         const nameBytes = encodeUTF8(f.path);
         const crc = crc32(f.data);
         const size = f.data.byteLength;
@@ -1643,60 +2076,66 @@ ${discs.map(d => `    // SOUND_EVENTS.register("music_disc.${d.id}", () -> new S
         // Local file header
         const local = [
           u32(0x04034b50),
-          u16(20),           // version needed
-          u16(0),            // flags
-          u16(0),            // compression = store
+          u16(20), // version needed
+          u16(0), // flags
+          u16(0), // compression = store
           u16(now.time),
           u16(now.date),
           u32(crc),
           u32(size),
           u32(size),
           u16(nameBytes.length),
-          u16(0),            // extra len
-          nameBytes
+          u16(0), // extra len
+          nameBytes,
         ];
         fileParts.push(...local, f.data);
-        const localLen = local.reduce((s,p)=>s+(p.byteLength||p.length||0),0) + size;
+        const localLen = local.reduce((s, p) => s + (p.byteLength || p.length || 0), 0) + size;
 
         // Central directory header
         const central = [
           u32(0x02014b50),
-          u16(20), u16(20),
+          u16(20),
+          u16(20),
           u16(0),
           u16(0),
-          u16(now.time), u16(now.date),
+          u16(now.time),
+          u16(now.date),
           u32(crc),
-          u32(size), u32(size),
+          u32(size),
+          u32(size),
           u16(nameBytes.length),
-          u16(0), u16(0),
-          u16(0), u16(0),
+          u16(0),
+          u16(0),
+          u16(0),
+          u16(0),
           u32(0),
           u32(offset),
-          nameBytes
+          nameBytes,
         ];
         centralParts.push(...central);
 
-        offset += (30 + nameBytes.length + size); // local header fixed 30 bytes
+        offset += 30 + nameBytes.length + size; // local header fixed 30 bytes
       }
 
-      const centralSize = centralParts.reduce((s,p)=>s+(p.byteLength||p.length||0),0);
+      const centralSize = centralParts.reduce((s, p) => s + (p.byteLength || p.length || 0), 0);
       const centralOffset = offset;
 
       const end = [
         u32(0x06054b50),
-        u16(0), u16(0),
+        u16(0),
+        u16(0),
         u16(files.length),
         u16(files.length),
         u32(centralSize),
         u32(centralOffset),
-        u16(0)
+        u16(0),
       ];
 
-      const blob = new Blob([...fileParts, ...centralParts, ...end], {type:"application/zip"});
+      const blob = new Blob([...fileParts, ...centralParts, ...end], { type: "application/zip" });
       return blob;
     }
 
-    function downloadBlob(blob, filename){
+    function downloadBlob(blob, filename) {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -1704,22 +2143,22 @@ ${discs.map(d => `    // SOUND_EVENTS.register("music_disc.${d.id}", () -> new S
       document.body.appendChild(a);
       a.click();
       a.remove();
-      setTimeout(()=>URL.revokeObjectURL(url), 8000);
+      setTimeout(() => URL.revokeObjectURL(url), 8000);
     }
 
-    function validate(){
+    function validate() {
       const modid = safeModId(modidEl.value);
       modidEl.value = modid;
       const prefix = String(prefixEl.value || "records/").trim();
-      prefixEl.value = prefix.endsWith("/") ? prefix : (prefix + "/");
-      if (!state.discs.length){
-        logLine(`[err] No .ogg files imported. Add audio to generate discs.`, "err");
+      prefixEl.value = prefix.endsWith("/") ? prefix : prefix + "/";
+      if (!state.discs.some((d) => !d.skip)) {
+        logLine(`[err] No valid discs to export. Add audio and textures/models.`, "err");
         return false;
       }
       return true;
     }
 
-    async function exportZip(){
+    async function exportZip() {
       if (!validate()) return;
       const modid = safeModId(modidEl.value);
       const prefix = prefixEl.value || "records/";
@@ -1728,24 +2167,60 @@ ${discs.map(d => `    // SOUND_EVENTS.register("music_disc.${d.id}", () -> new S
 
       const entries = [];
 
-      // Assets: sounds.json, lang, item models
+      // Assets: sounds.json, lang, item models, textures
       entries.push({ path: `assets/${modid}/sounds.json`, data: buildSoundsJson(modid) });
       entries.push({ path: `assets/${modid}/lang/en_us.json`, data: buildLangJson(modid) });
 
-      for (const d of state.discs){
-        entries.push({ path: `assets/${modid}/models/item/${d.id}.json`, data: buildItemModelJson(modid, d.id) });
+      for (const d of state.discs) {
+        if (d.skip) continue;
+
+        // Item model JSON
+        if (d.jsonFileName) {
+          // Use uploaded JSON file content
+          const jsonFile = state.json.get(d.base);
+          if (jsonFile) {
+            const content = await jsonFile.text();
+            entries.push({ path: `assets/${modid}/models/item/${d.id}.json`, data: content });
+          } else {
+            // Should not happen, but fallback to generated flat model
+            entries.push({
+              path: `assets/${modid}/models/item/${d.id}.json`,
+              data: buildItemModelJson(modid, d),
+            });
+          }
+        } else if (d.pngFileName) {
+          // Generate flat item model JSON referencing png texture
+          entries.push({
+            path: `assets/${modid}/models/item/${d.id}.json`,
+            data: buildItemModelJson(modid, d),
+          });
+        } else {
+          // No png or json: generate flat model with default texture (warned earlier)
+          entries.push({
+            path: `assets/${modid}/models/item/${d.id}.json`,
+            data: buildItemModelJson(modid, d),
+          });
+        }
 
         // Include audio binary
         const base = d.base;
         const oggFile = state.ogg.get(base);
-        if (oggFile){
-          entries.push({ path: `assets/${modid}/sounds/${prefix}${d.id}.ogg`, data: oggFile });
+        if (oggFile) {
+          entries.push({
+            path: `assets/${modid}/sounds/${prefix}${d.id}.ogg`,
+            data: oggFile,
+          });
         }
 
-        // Include bbmodel if present
-        const bb = state.bbmodel.get(base);
-        if (bb){
-          entries.push({ path: `source_bbmodel/${d.id}.bbmodel`, data: bb });
+        // Include png texture if present
+        if (d.pngFileName) {
+          const pngFile = state.png.get(base);
+          if (pngFile) {
+            entries.push({
+              path: `assets/${modid}/textures/item/${d.id}.png`,
+              data: pngFile,
+            });
+          }
         }
       }
 
@@ -1754,14 +2229,21 @@ ${discs.map(d => `    // SOUND_EVENTS.register("music_disc.${d.id}", () -> new S
       for (const s of buildStubs(modid)) entries.push(s);
 
       // Quick checklist
-      entries.push({ path: `CHECKLIST.txt`, data:
-`DiscForge checklist
+      entries.push({
+        path: `CHECKLIST.txt`,
+        data: `DiscForge checklist
 - [ ] Copy assets/${modid}/ into your mod resources
-- [ ] Register SoundEvents for: ${state.discs.map(d=>`${modid}:music_disc.${d.id}`).join(", ")}
-- [ ] Register items for: ${state.discs.map(d=>`${modid}:${d.id}`).join(", ")}
+- [ ] Register SoundEvents for: ${state.discs
+          .filter((d) => !d.skip)
+          .map((d) => `${modid}:music_disc.${d.id}`)
+          .join(", ")}
+- [ ] Register items for: ${state.discs
+          .filter((d) => !d.skip)
+          .map((d) => `${modid}:${d.id}`)
+          .join(", ")}
 - [ ] Run the game; test: /give @p ${modid}:<disc_id>
 - [ ] Insert into jukebox; confirm playback
-`
+`,
       });
 
       const blob = await makeZip(entries);
@@ -1775,96 +2257,109 @@ ${discs.map(d => `    // SOUND_EVENTS.register("music_disc.${d.id}", () -> new S
       showCommandsPanel(modid);
     }
 
-    function showCommandsPanel(modid){
-      if (!state.discs.length) {
+    function showCommandsPanel(modid) {
+      const validDiscs = state.discs.filter((d) => !d.skip);
+      if (!validDiscs.length) {
         commandsPanel.style.display = "none";
         commandsText.textContent = "";
         return;
       }
-      const commands = state.discs.map(d => `/give @p ${modid}:${d.id}`).join("\n");
+      const commands = validDiscs.map((d) => `/give @p ${modid}:${d.id}`).join("\n");
       commandsText.textContent = commands;
       commandsPanel.style.display = "block";
       commandsPanel.scrollTop = 0;
     }
 
     // ---------- Buttons ----------
-    function scrollToGenerator(){
-      $("#generator").scrollIntoView({behavior:"smooth", block:"start"});
+    function scrollToGenerator() {
+      $("#generator").scrollIntoView({ behavior: "smooth", block: "start" });
     }
     $("#startNow").addEventListener("click", scrollToGenerator);
     $("#jumpGenerator").addEventListener("click", scrollToGenerator);
 
-    $("#autoName").addEventListener("click", ()=>{
+    $("#autoName").addEventListener("click", () => {
       if (!state.discs.length) return;
-      for (const d of state.discs){
+      for (const d of state.discs) {
         d.id = slugify(d.id || d.base);
       }
       renderDiscs();
       logLine(`[normalize] Normalized ${state.discs.length} IDs.`, "ok");
     });
 
-    $("#copySoundsJson").addEventListener("click", ()=>{
+    $("#copySoundsJson").addEventListener("click", () => {
       const modid = safeModId(modidEl.value);
       copyText(buildSoundsJson(modid));
       logLine(`[copy] sounds.json copied.`, "ok");
     });
 
-    $("#previewJson").addEventListener("click", ()=>{
+    $("#previewJson").addEventListener("click", () => {
       const modid = safeModId(modidEl.value);
       const preview = [
         `--- sounds.json ---\n${buildSoundsJson(modid)}`,
-        `--- en_us.json ---\n${buildLangJson(modid)}`
+        `--- en_us.json ---\n${buildLangJson(modid)}`,
       ].join("\n");
       copyText(preview);
       logLine(`[preview] Copied sounds.json + en_us.json preview.`, "ok");
     });
 
-    $("#copyGiveAll").addEventListener("click", ()=>{
+    $("#copyGiveAll").addEventListener("click", () => {
       const modid = safeModId(modidEl.value);
-      if (!state.discs.length){
-        toast("Import .ogg files first.");
+      const validDiscs = state.discs.filter((d) => !d.skip);
+      if (!validDiscs.length) {
+        toast("Import valid discs first.");
         return;
       }
-      const text = state.discs.map(d=>`/give @p ${modid}:${d.id}`).join("\n");
+      const text = validDiscs.map((d) => `/give @p ${modid}:${d.id}`).join("\n");
       copyText(text);
-      logLine(`[copy] Copied ${state.discs.length} /give commands.`, "ok");
+      logLine(`[copy] Copied ${validDiscs.length} /give commands.`, "ok");
     });
 
-    copyCommandsBtn.addEventListener("click", ()=>{
-      if (commandsText.textContent.trim().length > 0){
+    copyCommandsBtn.addEventListener("click", () => {
+      if (commandsText.textContent.trim().length > 0) {
         copyText(commandsText.textContent);
       }
     });
 
     $("#exportZip").addEventListener("click", exportZip);
 
-    $("#loadDemo").addEventListener("click", ()=>{
+    $("#loadDemo").addEventListener("click", () => {
       // Demo without external files: create "virtual" discs (no audio binaries),
       // but still lets users preview output structure & commands.
       // We won't fake .ogg bytes; we’ll just populate discs list for UI.
       const demoBases = ["mellow_night", "crimson_arcade", "aquifer_drift", "sunset_raid"];
       state.ogg.clear();
-      state.bbmodel.clear();
-      for (const b of demoBases){
+      state.png.clear();
+      state.json.clear();
+      for (const b of demoBases) {
         // Create empty placeholder blobs so ZIP export still contains files (tiny).
-        const oggBlob = new Blob([new Uint8Array([0x4F,0x67,0x67,0x53])], {type:"audio/ogg"}); // "OggS" header bytes
-        const oggFile = new File([oggBlob], `${b}.ogg`, {type:"audio/ogg"});
+        const oggBlob = new Blob([new Uint8Array([0x4f, 0x67, 0x67, 0x53])], { type: "audio/ogg" }); // "OggS" header bytes
+        const oggFile = new File([oggBlob], `${b}.ogg`, { type: "audio/ogg" });
         state.ogg.set(b, oggFile);
 
-        if (Math.random() > 0.45){
-          const bbBlob = new Blob([encodeUTF8(`{"meta":"demo","name":"${b}"}`)], {type:"application/json"});
-          const bbFile = new File([bbBlob], `${b}.bbmodel`, {type:"application/json"});
-          state.bbmodel.set(b, bbFile);
+        // Add png for half of them
+        if (Math.random() > 0.5) {
+          const pngBlob = new Blob([], { type: "image/png" });
+          const pngFile = new File([pngBlob], `${b}.png`, { type: "image/png" });
+          state.png.set(b, pngFile);
+        } else {
+          // Add json for others (without png to avoid error)
+          const jsonBlob = new Blob([`{"parent":"item/generated","textures":{"layer0":"discforge:item/${b}"}}`], {
+            type: "application/json",
+          });
+          const jsonFile = new File([jsonBlob], `${b}.json`, { type: "application/json" });
+          state.json.set(b, jsonFile);
         }
       }
       buildDiscsFromMaps();
       renderDiscs();
-      logLine(`[demo] Loaded ${state.discs.length} demo discs. Replace with real .ogg when ready.`, "warn");
+      logLine(`[demo] Loaded ${state.discs.length} demo discs. Replace with real .ogg/.png/.json when ready.`, "warn");
       scrollToGenerator();
     });
 
     // Keep modid sanitized
-    modidEl.addEventListener("blur", ()=>{ modidEl.value = safeModId(modidEl.value); });
+    modidEl.addEventListener("blur", () => {
+      modidEl.value = safeModId(modidEl.value);
+    });
 
     // Initialize
     renderDiscs();
