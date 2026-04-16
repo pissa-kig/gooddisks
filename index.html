@@ -3,2366 +3,1859 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="color-scheme" content="dark" />
-  <title>DiscForge — Turn .ogg + .png/.json into a Minecraft Music Disc Mod</title>
+  <meta name="color-scheme" content="dark light" />
+  <title>DiscForge — Minecraft Music Disc Mod Generator</title>
 
-  <!-- Typography: display + readable body -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,650;9..144,800&display=swap"
-    rel="stylesheet"
-  />
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
   <style>
-    :root {
-      /* Retro-tech / “modding terminal” vibe with crafted color system */
-      --bg0: #070a0f;
-      --bg1: #0b1020;
-      --panel: #0d1428;
-      --panel2: #0b1226;
-      --ink: #eaf0ff;
-      --muted: #a7b3da;
-      --faint: #7e8bb6;
+    :root{
+      --bg0:#070A0F;
+      --bg1:#0A0F1A;
+      --panel: rgba(255,255,255,.06);
+      --panel2: rgba(255,255,255,.08);
+      --stroke: rgba(255,255,255,.12);
+      --stroke2: rgba(255,255,255,.18);
+      --text:#EAF0FF;
+      --muted: rgba(234,240,255,.72);
+      --muted2: rgba(234,240,255,.52);
+      --good:#5EF2B0;
+      --warn:#FFCE5C;
+      --bad:#FF5A7A;
 
-      --lime: #67ff9a;
-      --teal: #2ce7d3;
-      --amber: #ffb000;
-      --rose: #ff4d7d;
-      --violet: #a98bff;
+      --accent:#78A6FF;
+      --accent2:#B28CFF;
 
-      --stroke: rgba(234, 240, 255, 0.1);
-      --stroke2: rgba(234, 240, 255, 0.16);
-      --shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
+      --shadow: 0 18px 60px rgba(0,0,0,.55);
+      --shadow2: 0 10px 30px rgba(0,0,0,.35);
 
-      --radius-lg: 26px;
-      --radius-md: 18px;
+      --radius-xl: 28px;
+      --radius-lg: 18px;
+      --radius-md: 14px;
       --radius-sm: 12px;
 
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
-        "Courier New", monospace;
-      --display: "Fraunces", serif;
-      --body: "Space Grotesk", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-
-      --pad: clamp(18px, 2.2vw, 28px);
-      --max: 1160px;
-
-      --ease: cubic-bezier(0.2, 0.9, 0.2, 1);
+      --max: 1180px;
     }
 
-    * {
-      box-sizing: border-box;
-    }
-    html,
-    body {
-      height: 100%;
-    }
-    body {
-      margin: 0;
-      background: radial-gradient(1100px 600px at 18% 8%, rgba(103, 255, 154, 0.18), transparent 55%),
-        radial-gradient(900px 520px at 82% 18%, rgba(44, 231, 211, 0.16), transparent 60%),
-        radial-gradient(860px 520px at 72% 84%, rgba(169, 139, 255, 0.14), transparent 58%),
-        radial-gradient(900px 520px at 30% 92%, rgba(255, 77, 125, 0.1), transparent 62%),
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: "IBM Plex Sans", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 700px at 10% 10%, rgba(120,166,255,.18), transparent 55%),
+        radial-gradient(900px 600px at 85% 15%, rgba(178,140,255,.16), transparent 55%),
+        radial-gradient(1100px 800px at 50% 85%, rgba(94,242,176,.08), transparent 55%),
         linear-gradient(180deg, var(--bg0), var(--bg1));
-      color: var(--ink);
-      font-family: var(--body);
-      letter-spacing: 0.2px;
-      overflow-x: hidden;
+      overflow-x:hidden;
     }
 
-    a {
-      color: inherit;
-    }
-    .wrap {
-      max-width: var(--max);
-      margin: 0 auto;
-      padding: 0 var(--pad);
-    }
-    .sr-only {
-      position: absolute !important;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border: 0;
+    /* Subtle “grid” texture */
+    .texture{
+      position:fixed; inset:0;
+      pointer-events:none;
+      background:
+        linear-gradient(to right, rgba(255,255,255,.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,.04) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: radial-gradient(65% 55% at 50% 35%, rgba(0,0,0,1), rgba(0,0,0,.0));
+      opacity:.35;
     }
 
-    /* Subtle pixel grid texture */
-    .grain {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      opacity: 0.22;
-      mix-blend-mode: overlay;
-      background: linear-gradient(transparent 15px, rgba(255, 255, 255, 0.04) 16px),
-        linear-gradient(90deg, transparent 15px, rgba(255, 255, 255, 0.04) 16px);
-      background-size: 16px 16px;
-      mask-image: radial-gradient(1200px 700px at 50% 20%, #000 55%, transparent 100%);
-    }
-
-    /* Top nav */
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 50;
+    header{
+      position:sticky; top:0; z-index:50;
       backdrop-filter: blur(14px);
-      background: linear-gradient(180deg, rgba(7, 10, 15, 0.78), rgba(7, 10, 15, 0.46));
-      border-bottom: 1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(7,10,15,.82), rgba(7,10,15,.55));
+      border-bottom: 1px solid rgba(255,255,255,.08);
     }
-    .nav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px var(--pad);
+
+    .topbar{
       max-width: var(--max);
       margin: 0 auto;
-      gap: 14px;
-    }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-width: 220px;
-      text-decoration: none;
-    }
-    .mark {
-      width: 38px;
-      height: 38px;
-      border-radius: 12px;
-      background: radial-gradient(12px 12px at 28% 30%, rgba(103, 255, 154, 0.85), transparent 60%),
-        radial-gradient(12px 12px at 68% 62%, rgba(44, 231, 211, 0.8), transparent 60%),
-        linear-gradient(135deg, rgba(169, 139, 255, 0.22), rgba(255, 77, 125, 0.12));
-      border: 1px solid rgba(234, 240, 255, 0.18);
-      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
-      position: relative;
-      overflow: hidden;
-    }
-    .mark:before {
-      content: "";
-      position: absolute;
-      inset: -30%;
-      background: conic-gradient(
-        from 180deg,
-        transparent,
-        rgba(103, 255, 154, 0.35),
-        transparent 55%,
-        rgba(44, 231, 211, 0.3),
-        transparent
-      );
-      animation: spin 9s linear infinite;
-      opacity: 0.8;
-    }
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-    .brand b {
-      font-family: var(--display);
-      letter-spacing: 0.2px;
-      font-weight: 800;
-      font-size: 18px;
-      line-height: 1.05;
-    }
-    .brand span {
-      display: block;
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 2px;
+      padding: 14px 18px;
+      display:flex;
+      align-items:center;
+      gap:14px;
     }
 
-    .navlinks {
-      display: flex;
-      align-items: center;
-      gap: 16px;
+    .brand{
+      display:flex; align-items:center; gap:12px;
+      min-width: 240px;
     }
-    .navlinks a {
-      text-decoration: none;
+    .logo{
+      width:38px; height:38px; border-radius: 14px;
+      background:
+        radial-gradient(12px 12px at 30% 30%, rgba(255,255,255,.35), transparent 60%),
+        linear-gradient(135deg, rgba(120,166,255,.95), rgba(178,140,255,.95));
+      box-shadow: 0 10px 30px rgba(120,166,255,.18);
+      border: 1px solid rgba(255,255,255,.18);
+      position:relative;
+      overflow:hidden;
+    }
+    .logo::after{
+      content:"";
+      position:absolute; inset:-30%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.35), transparent 55%);
+      transform: rotate(18deg);
+      opacity:.7;
+    }
+    .brand h1{
+      margin:0;
+      font-family:"Space Grotesk", ui-sans-serif, system-ui;
+      font-weight:700;
+      letter-spacing:-.02em;
+      font-size: 15px;
+      line-height: 1.1;
+    }
+    .brand p{
+      margin:0;
+      font-size:12px;
       color: var(--muted);
-      font-weight: 600;
-      font-size: 13px;
-      letter-spacing: 0.4px;
-      text-transform: uppercase;
-      padding: 10px 10px;
-      border-radius: 12px;
-      transition: transform 0.18s var(--ease), background 0.18s var(--ease), color 0.18s var(--ease);
-    }
-    .navlinks a:hover {
-      color: var(--ink);
-      background: rgba(234, 240, 255, 0.06);
-      transform: translateY(-1px);
+      letter-spacing:.02em;
     }
 
-    .navcta {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .btn {
-      appearance: none;
-      border: 1px solid rgba(234, 240, 255, 0.18);
-      background: rgba(13, 20, 40, 0.65);
-      color: var(--ink);
-      padding: 10px 12px;
-      border-radius: 14px;
-      font-weight: 700;
-      letter-spacing: 0.2px;
-      cursor: pointer;
-      transition: transform 0.18s var(--ease), border-color 0.18s var(--ease),
-        background 0.18s var(--ease), box-shadow 0.18s var(--ease);
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      user-select: none;
-    }
-    .btn:hover {
-      transform: translateY(-1px);
-      border-color: rgba(103, 255, 154, 0.35);
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
-      background: rgba(13, 20, 40, 0.78);
-    }
-    .btn:active {
-      transform: translateY(0px) scale(0.98);
-    }
-    .btn.primary {
-      border-color: rgba(103, 255, 154, 0.4);
-      background: linear-gradient(180deg, rgba(103, 255, 154, 0.15), rgba(44, 231, 211, 0.09));
-    }
-    .btn.primary:hover {
-      border-color: rgba(44, 231, 211, 0.52);
-    }
-    .chip {
-      font-family: var(--mono);
-      font-size: 12px;
-      padding: 3px 8px;
+    .pill{
+      margin-left:auto;
+      display:flex; align-items:center; gap:10px;
+      padding:10px 12px;
       border-radius: 999px;
-      border: 1px solid rgba(234, 240, 255, 0.18);
-      background: rgba(7, 10, 15, 0.35);
-      color: var(--muted);
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      box-shadow: var(--shadow2);
+    }
+    .pill .dot{
+      width:9px; height:9px; border-radius:99px;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.6), rgba(255,255,255,.0));
+      box-shadow: 0 0 0 3px rgba(120,166,255,.18);
+      background-color: var(--accent);
+    }
+    .pill small{color:var(--muted); font-size:12px}
+    .pill b{font-family:"Space Grotesk"; font-weight:600; font-size:12px; letter-spacing:.02em}
+
+    main{
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 22px 18px 60px;
     }
 
-    /* Hero */
-    main {
-      padding-bottom: 70px;
-    }
-    .hero {
-      padding: clamp(22px, 4.5vw, 54px) 0 18px;
-      position: relative;
-    }
-    .heroGrid {
-      display: grid;
-      grid-template-columns: 1.15fr 0.85fr;
-      gap: clamp(18px, 3vw, 30px);
-      align-items: stretch;
-    }
-    @media (max-width: 980px) {
-      .heroGrid {
-        grid-template-columns: 1fr;
-      }
-      .brand {
-        min-width: unset;
-      }
-      .navlinks {
-        display: none;
-      }
-    }
-    .kicker {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(234, 240, 255, 0.16);
-      background: rgba(13, 20, 40, 0.52);
-      color: var(--muted);
-      font-weight: 700;
-      letter-spacing: 0.2px;
-      font-size: 13px;
-    }
-    .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-      background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 45%),
-        linear-gradient(180deg, var(--lime), var(--teal));
-      box-shadow: 0 0 0 3px rgba(103, 255, 154, 0.12);
-    }
-
-    h1 {
-      margin: 0 0 12px 0;
-      font-family: var(--display);
-      font-weight: 800;
-      line-height: 0.95;
-      letter-spacing: -0.8px;
-      font-size: clamp(40px, 4.5vw, 78px);
-    }
-    .lede {
-      margin: 0 0 18px;
-      color: var(--muted);
-      max-width: 62ch;
-      font-size: clamp(16px, 1.35vw, 18px);
-      line-height: 1.55;
-    }
-    .heroActions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 18px;
-      align-items: center;
-    }
-    .metaRow {
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
-      margin-top: 18px;
-      color: var(--faint);
-      font-family: var(--mono);
-      font-size: 12px;
-    }
-    .metaRow span {
-      display: inline-flex;
-      gap: 8px;
-      align-items: center;
-      padding: 6px 10px;
-      border: 1px dashed rgba(234, 240, 255, 0.14);
-      border-radius: 999px;
-      background: rgba(7, 10, 15, 0.22);
-    }
-    .metaRow i {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      background: rgba(234, 240, 255, 0.34);
-    }
-
-    /* Right panel: “console” */
-    .console {
-      border-radius: var(--radius-lg);
-      border: 1px solid rgba(234, 240, 255, 0.16);
-      background: linear-gradient(180deg, rgba(13, 20, 40, 0.78), rgba(11, 18, 38, 0.62));
-      box-shadow: var(--shadow);
-      overflow: hidden;
-      position: relative;
-      min-height: 420px;
-    }
-    .consoleTop {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 16px;
-      border-bottom: 1px solid rgba(234, 240, 255, 0.12);
-      background: linear-gradient(180deg, rgba(7, 10, 15, 0.35), rgba(7, 10, 15, 0.12));
-    }
-    .lights {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-    .lights b {
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-      display: inline-block;
-      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.06);
-    }
-    .lights b:nth-child(1) {
-      background: rgba(255, 77, 125, 0.85);
-    }
-    .lights b:nth-child(2) {
-      background: rgba(255, 176, 0, 0.85);
-    }
-    .lights b:nth-child(3) {
-      background: rgba(103, 255, 154, 0.85);
-    }
-    .consoleTitle {
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--muted);
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-    .consoleTitle .chip {
-      border-style: solid;
-      background: rgba(13, 20, 40, 0.55);
-    }
-    .consoleBody {
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .dropzone {
-      border-radius: 18px;
-      border: 1px dashed rgba(234, 240, 255, 0.22);
-      background: radial-gradient(450px 220px at 25% 30%, rgba(103, 255, 154, 0.1), transparent 60%),
-        radial-gradient(450px 220px at 70% 70%, rgba(44, 231, 211, 0.1), transparent 60%), rgba(7, 10, 15, 0.28);
-      padding: 14px;
-      min-height: 150px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      position: relative;
-      overflow: hidden;
-      transition: border-color 0.2s var(--ease), transform 0.2s var(--ease), background 0.2s var(--ease);
-    }
-    .dropzone.isDrag {
-      border-color: rgba(103, 255, 154, 0.55);
-      transform: translateY(-2px);
-      background: radial-gradient(550px 260px at 25% 30%, rgba(103, 255, 154, 0.14), transparent 62%),
-        radial-gradient(520px 260px at 70% 70%, rgba(44, 231, 211, 0.14), transparent 62%), rgba(7, 10, 15, 0.3);
-    }
-    .dzTop {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 12px;
-    }
-    .dzTop h3 {
-      margin: 0;
-      font-family: var(--display);
-      font-weight: 800;
-      letter-spacing: -0.3px;
-      font-size: 20px;
-      line-height: 1.05;
-    }
-    .dzTop p {
-      margin: 4px 0 0;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.45;
-      max-width: 44ch;
-    }
-    .filePills {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 6px;
-      color: var(--muted);
-      font-family: var(--mono);
-      font-size: 12px;
-    }
-    .pill {
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(234, 240, 255, 0.14);
-      background: rgba(13, 20, 40, 0.4);
-    }
-    .dzActions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-      margin-top: 2px;
-    }
-    .btn.small {
-      padding: 9px 11px;
-      border-radius: 12px;
-      font-size: 13px;
-    }
-    input[type="file"] {
-      display: none;
-    }
-
-    .log {
-      border-radius: 18px;
-      border: 1px solid rgba(234, 240, 255, 0.12);
-      background: rgba(7, 10, 15, 0.28);
-      padding: 12px 12px;
-      height: 170px;
-      overflow: auto;
-      font-family: var(--mono);
-      font-size: 12px;
-      color: rgba(234, 240, 255, 0.88);
-      line-height: 1.45;
-      white-space: pre-wrap;
-    }
-    .log .muted {
-      color: rgba(167, 179, 218, 0.86);
-    }
-    .log .ok {
-      color: rgba(103, 255, 154, 0.92);
-    }
-    .log .warn {
-      color: rgba(255, 176, 0, 0.92);
-    }
-    .log .err {
-      color: rgba(255, 77, 125, 0.95);
-    }
-    .logLine {
-      margin: 0 0 6px 0;
-    }
-
-    /* Sections */
-    section {
-      padding: clamp(22px, 4vw, 54px) 0;
-    }
-    .sectionHead {
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
+    .hero{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
       gap: 18px;
-      margin-bottom: 16px;
-    }
-    .sectionHead h2 {
-      margin: 0;
-      font-family: var(--display);
-      font-weight: 800;
-      letter-spacing: -0.6px;
-      font-size: clamp(26px, 2.5vw, 40px);
-      line-height: 1.02;
-    }
-    .sectionHead p {
-      margin: 0;
-      color: var(--muted);
-      max-width: 60ch;
-      line-height: 1.55;
-    }
-    .divider {
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(234, 240, 255, 0.16), transparent);
-      margin: 22px 0 0;
+      align-items: stretch;
+      margin-top: 8px;
     }
 
-    /* “No cards” feature blocks: use split rows */
-    .flow {
-      display: grid;
-      grid-template-columns: 1fr;
+    .heroCard{
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(255,255,255,.12);
+      background:
+        radial-gradient(900px 400px at 20% 0%, rgba(120,166,255,.18), transparent 60%),
+        radial-gradient(700px 360px at 80% 20%, rgba(178,140,255,.14), transparent 62%),
+        rgba(255,255,255,.055);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+
+    .heroCard .inner{
+      padding: 22px 22px 18px;
+      display:flex;
+      flex-direction:column;
       gap: 14px;
-      margin-top: 14px;
     }
-    .row {
-      display: grid;
-      grid-template-columns: 0.92fr 1.08fr;
-      gap: 16px;
-      border-radius: var(--radius-lg);
-      border: 1px solid rgba(234, 240, 255, 0.12);
-      background: linear-gradient(180deg, rgba(13, 20, 40, 0.55), rgba(11, 18, 38, 0.35));
-      padding: 16px;
-      overflow: hidden;
-      position: relative;
-    }
-    .row:before {
-      content: "";
-      position: absolute;
-      inset: -2px;
-      background: radial-gradient(380px 160px at 18% 18%, rgba(103, 255, 154, 0.1), transparent 65%),
-        radial-gradient(380px 160px at 88% 68%, rgba(169, 139, 255, 0.1), transparent 65%);
-      pointer-events: none;
-      opacity: 0.9;
-    }
-    @media (max-width: 980px) {
-      .row {
-        grid-template-columns: 1fr;
-      }
-    }
-    .row h3 {
-      margin: 0 0 8px 0;
-      font-family: var(--display);
-      letter-spacing: -0.35px;
-      font-weight: 800;
-      font-size: 22px;
-      position: relative;
-    }
-    .row p {
-      margin: 0;
+
+    .kicker{
+      display:flex; align-items:center; gap:10px;
       color: var(--muted);
-      line-height: 1.6;
-      position: relative;
+      font-size: 13px;
+      letter-spacing:.08em;
+      text-transform: uppercase;
     }
-    .rowAside {
-      position: relative;
-      border-radius: 18px;
-      border: 1px solid rgba(234, 240, 255, 0.12);
-      background: radial-gradient(360px 200px at 20% 30%, rgba(44, 231, 211, 0.1), transparent 60%),
-        radial-gradient(360px 200px at 70% 70%, rgba(255, 176, 0, 0.1), transparent 60%), rgba(7, 10, 15, 0.26);
-      padding: 14px;
-      overflow: hidden;
-    }
-    .rowAside .code {
-      font-family: var(--mono);
+    .kicker .badge{
+      font-family:"Space Grotesk";
+      font-weight:700;
       font-size: 12px;
-      line-height: 1.55;
-      color: rgba(234, 240, 255, 0.88);
-      white-space: pre-wrap;
-      margin: 0;
-    }
-    .rowAside .code .k {
-      color: rgba(103, 255, 154, 0.92);
-    }
-    .rowAside .code .t {
-      color: rgba(44, 231, 211, 0.92);
-    }
-    .rowAside .code .n {
-      color: rgba(169, 139, 255, 0.95);
-    }
-    .rowAside .code .w {
-      color: rgba(255, 176, 0, 0.92);
-    }
-    .rowAside .code .r {
-      color: rgba(255, 77, 125, 0.92);
-    }
-
-    /* Gallery list (allowed: it’s a list of generated discs) */
-    .gen {
-      display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
-      gap: 16px;
-      align-items: start;
-      margin-top: 18px;
-    }
-    @media (max-width: 980px) {
-      .gen {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .panel {
-      border-radius: var(--radius-lg);
-      border: 1px solid rgba(234, 240, 255, 0.14);
-      background: linear-gradient(180deg, rgba(13, 20, 40, 0.62), rgba(11, 18, 38, 0.4));
-      box-shadow: 0 16px 50px rgba(0, 0, 0, 0.35);
-      overflow: hidden;
-    }
-    .panelHead {
-      padding: 14px 16px;
-      border-bottom: 1px solid rgba(234, 240, 255, 0.12);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      background: rgba(7, 10, 15, 0.18);
-    }
-    .panelHead h3 {
-      margin: 0;
-      font-family: var(--display);
-      font-weight: 800;
-      letter-spacing: -0.3px;
-      font-size: 20px;
-    }
-    .panelBody {
-      padding: 14px 16px;
-    }
-
-    .list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .item {
-      display: grid;
-      grid-template-columns: 42px 1fr auto;
-      gap: 12px;
-      align-items: center;
-      padding: 10px 10px;
-      border-radius: 16px;
-      border: 1px solid rgba(234, 240, 255, 0.1);
-      background: rgba(7, 10, 15, 0.24);
-      transition: transform 0.18s var(--ease), border-color 0.18s var(--ease),
-        background 0.18s var(--ease);
-    }
-    .item:hover {
-      transform: translateY(-1px);
-      border-color: rgba(44, 231, 211, 0.28);
-      background: rgba(7, 10, 15, 0.3);
-    }
-    .discIcon {
-      width: 42px;
-      height: 42px;
-      border-radius: 14px;
-      border: 1px solid rgba(234, 240, 255, 0.14);
-      background: radial-gradient(10px 10px at 36% 34%, rgba(255, 255, 255, 0.95), transparent 55%),
-        radial-gradient(14px 14px at 62% 62%, rgba(44, 231, 211, 0.55), transparent 60%),
-        conic-gradient(
-          from 0deg,
-          rgba(103, 255, 154, 0.55),
-          rgba(169, 139, 255, 0.45),
-          rgba(255, 77, 125, 0.45),
-          rgba(255, 176, 0, 0.38),
-          rgba(103, 255, 154, 0.55)
-        );
-      position: relative;
-      overflow: hidden;
-    }
-    .discIcon:after {
-      content: "";
-      position: absolute;
-      inset: 12px;
+      padding:6px 10px;
       border-radius: 999px;
-      background: radial-gradient(circle at 30% 30%, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.62));
-      border: 1px solid rgba(234, 240, 255, 0.1);
-    }
-    .item b {
-      font-weight: 800;
-    }
-    .item small {
-      display: block;
-      color: var(--muted);
-      font-family: var(--mono);
-      margin-top: 2px;
-      font-size: 12px;
-    }
-    .item .actions {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-    .iconBtn {
-      width: 38px;
-      height: 38px;
-      border-radius: 14px;
-      border: 1px solid rgba(234, 240, 255, 0.14);
-      background: rgba(13, 20, 40, 0.45);
-      color: var(--ink);
-      cursor: pointer;
-      transition: transform 0.18s var(--ease), border-color 0.18s var(--ease),
-        background 0.18s var(--ease);
-      display: grid;
-      place-items: center;
-    }
-    .iconBtn:hover {
-      transform: translateY(-1px);
-      border-color: rgba(103, 255, 154, 0.35);
-      background: rgba(13, 20, 40, 0.62);
-    }
-    .iconBtn:active {
-      transform: translateY(0) scale(0.98);
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.15);
     }
 
-    /* Settings form */
-    .form {
-      display: grid;
+    .heroTitle{
+      font-family:"Space Grotesk";
+      font-weight: 700;
+      letter-spacing:-.03em;
+      line-height: 1.02;
+      margin:0;
+      font-size: clamp(28px, 3.2vw, 44px);
+    }
+    .heroTitle .grad{
+      background: linear-gradient(135deg, rgba(120,166,255,1), rgba(178,140,255,1), rgba(94,242,176,.9));
+      -webkit-background-clip:text;
+      background-clip:text;
+      color: transparent;
+    }
+
+    .heroDesc{
+      margin:0;
+      color: var(--muted);
+      font-size: 14.5px;
+      line-height: 1.55;
+      max-width: 64ch;
+    }
+
+    .ctaRow{
+      display:flex;
+      gap: 10px;
+      flex-wrap:wrap;
+      margin-top: 4px;
+    }
+
+    .btn{
+      appearance:none;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.07);
+      color: var(--text);
+      border-radius: 14px;
+      padding: 11px 14px;
+      font-family:"Space Grotesk";
+      letter-spacing:.01em;
+      font-weight:600;
+      font-size: 13px;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      transition: transform .14s ease, background .14s ease, border-color .14s ease, box-shadow .14s ease;
+      box-shadow: 0 10px 24px rgba(0,0,0,.25);
+      user-select:none;
+      text-decoration:none;
+    }
+    .btn:hover{
+      transform: translateY(-1px);
+      background: rgba(255,255,255,.095);
+      border-color: rgba(255,255,255,.22);
+      box-shadow: 0 14px 30px rgba(0,0,0,.32);
+    }
+    .btn:active{transform: translateY(0px) scale(.99)}
+    .btn.primary{
+      background: linear-gradient(135deg, rgba(120,166,255,.92), rgba(178,140,255,.86));
+      border-color: rgba(255,255,255,.18);
+      color: #071018;
+      box-shadow: 0 18px 40px rgba(120,166,255,.12);
+    }
+    .btn.primary:hover{
+      filter: saturate(1.02) contrast(1.02);
+      box-shadow: 0 22px 46px rgba(120,166,255,.16);
+    }
+    .btn.danger{
+      border-color: rgba(255,90,122,.35);
+      background: rgba(255,90,122,.12);
+    }
+    .btn.danger:hover{
+      border-color: rgba(255,90,122,.55);
+      background: rgba(255,90,122,.16);
+    }
+
+    .icon{
+      width:16px; height:16px; display:inline-block;
+    }
+    .icon svg{width:100%; height:100%}
+
+    .heroAside{
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+      position:relative;
+    }
+    .heroAside .inner{padding: 18px 18px 16px}
+    .heroAside h3{
+      margin:0 0 10px;
+      font-family:"Space Grotesk";
+      font-weight:700;
+      letter-spacing:-.02em;
+      font-size: 15px;
+      color: rgba(234,240,255,.92);
+    }
+    .hint{
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .miniSteps{
+      display:grid;
+      gap: 10px;
+    }
+    .step{
+      display:flex; gap: 12px;
+      padding: 12px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+    }
+    .step .num{
+      width: 26px; height: 26px;
+      border-radius: 10px;
+      display:grid; place-items:center;
+      font-family:"Space Grotesk";
+      font-weight:700;
+      font-size: 12px;
+      color: #071018;
+      background: linear-gradient(135deg, rgba(94,242,176,1), rgba(120,166,255,.95));
+      flex: 0 0 auto;
+    }
+    .step b{display:block; font-family:"Space Grotesk"; font-weight:650; font-size: 13px; margin:0 0 2px}
+    .step span{display:block; color: var(--muted); font-size: 12.5px; line-height: 1.4}
+
+    /* Workspace layout */
+    .workspace{
+      margin-top: 18px;
+      display:grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 18px;
+      align-items:start;
+    }
+
+    section.panel{
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+    }
+
+    .panelHeader{
+      display:flex; align-items:flex-end; justify-content:space-between;
+      padding: 16px 18px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+    }
+    .panelHeader h2{
+      margin:0;
+      font-family:"Space Grotesk";
+      font-weight: 700;
+      letter-spacing:-.02em;
+      font-size: 16px;
+    }
+    .panelHeader p{
+      margin:0;
+      color: var(--muted);
+      font-size: 12.5px;
+      max-width: 60ch;
+      line-height: 1.45;
+    }
+
+    .panelBody{padding: 16px 18px 18px}
+
+    /* Upload */
+    .drop{
+      border-radius: 22px;
+      border: 1px dashed rgba(255,255,255,.20);
+      background:
+        radial-gradient(800px 240px at 50% 0%, rgba(120,166,255,.12), transparent 60%),
+        rgba(0,0,0,.22);
+      padding: 16px;
+      position:relative;
+      overflow:hidden;
+    }
+    .drop::before{
+      content:"";
+      position:absolute; inset:-60px;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(178,140,255,.10), transparent 48%),
+        radial-gradient(circle at 75% 45%, rgba(94,242,176,.08), transparent 52%);
+      filter: blur(0px);
+      opacity:.9;
+      pointer-events:none;
+    }
+    .dropInner{
+      position:relative;
+      display:flex;
+      gap: 14px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
+    .dropText{
+      min-width: 240px;
+    }
+    .dropText b{
+      display:block;
+      font-family:"Space Grotesk";
+      font-weight: 700;
+      letter-spacing:-.02em;
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+    .dropText span{
+      display:block;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .dropActions{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    input[type="file"]{display:none}
+
+    .subRow{
+      display:flex;
+      gap: 12px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      margin-top: 12px;
+    }
+    .stats{
+      display:flex; gap: 10px; flex-wrap:wrap;
+      color: var(--muted);
+      font-size: 12.5px;
+    }
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+    }
+    .chip .sw{
+      width:8px; height:8px; border-radius:99px;
+      background: var(--accent);
+      box-shadow: 0 0 0 3px rgba(120,166,255,.16);
+    }
+    .chip .sw.tex{background: var(--good); box-shadow:0 0 0 3px rgba(94,242,176,.14)}
+    .chip .sw.other{background: var(--warn); box-shadow:0 0 0 3px rgba(255,206,92,.14)}
+
+    /* Lists */
+    .listBlock{
+      margin-top: 14px;
+      display:grid;
+      gap: 12px;
+    }
+    .listGroup{
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+      overflow:hidden;
+    }
+    .groupHead{
+      padding: 12px 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.04);
+    }
+    .groupHead h3{
+      margin:0;
+      font-family:"Space Grotesk";
+      font-weight:700;
+      font-size: 13px;
+      letter-spacing:.02em;
+      text-transform: uppercase;
+      color: rgba(234,240,255,.86);
+    }
+    .groupHead .meta{
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .items{padding: 10px 12px 12px}
+    .item{
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items:center;
+      padding: 9px 10px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      transition: background .14s ease, border-color .14s ease, transform .14s ease;
+    }
+    .item:hover{
+      background: rgba(255,255,255,.04);
+      border-color: rgba(255,255,255,.10);
+      transform: translateY(-1px);
+    }
+    .item .name{
+      display:flex; flex-direction:column; gap:2px;
+      min-width:0;
+    }
+    .item .name b{
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(234,240,255,.92);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .item .name small{
+      font-size: 12px;
+      color: var(--muted2);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .pillTag{
+      font-size: 12px;
+      padding: 6px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      color: var(--muted);
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      flex: 0 0 auto;
+    }
+    .pillTag .k{
+      width: 7px; height: 7px; border-radius: 99px;
+      background: var(--good);
+      box-shadow: 0 0 0 3px rgba(94,242,176,.12);
+    }
+    .pillTag.miss .k{background: var(--bad); box-shadow:0 0 0 3px rgba(255,90,122,.12)}
+    .pillTag.dup .k{background: var(--warn); box-shadow:0 0 0 3px rgba(255,206,92,.12)}
+
+    /* Settings */
+    .grid2{
+      display:grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
     }
-    @media (max-width: 620px) {
-      .form {
-        grid-template-columns: 1fr;
-      }
+    .field{
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+      padding: 12px 12px;
     }
-    label {
-      display: block;
-      font-weight: 800;
-      font-size: 13px;
-      color: rgba(234, 240, 255, 0.92);
-      margin-bottom: 8px;
-      letter-spacing: 0.25px;
-    }
-    .field {
-      border-radius: 16px;
-      border: 1px solid rgba(234, 240, 255, 0.14);
-      background: rgba(7, 10, 15, 0.22);
-      padding: 10px 12px;
-      color: var(--ink);
-      width: 100%;
-      outline: none;
-      transition: border-color 0.18s var(--ease), transform 0.18s var(--ease);
-      font-family: var(--body);
-      font-weight: 650;
-    }
-    .field:focus {
-      border-color: rgba(44, 231, 211, 0.45);
-      transform: translateY(-1px);
-    }
-    .hint {
-      margin-top: 8px;
-      color: var(--muted);
+    .field label{
+      display:block;
       font-size: 12px;
-      line-height: 1.5;
-    }
-    .stack {
-      display: flex;
-      flex-direction: column;
-    }
-    .wide {
-      grid-column: 1 / -1;
-    }
-    .formActions {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      align-items: center;
-      margin-top: 10px;
-    }
-
-    /* Footer */
-    footer {
-      padding: 24px 0 40px;
-      border-top: 1px solid var(--stroke);
-      background: linear-gradient(180deg, rgba(7, 10, 15, 0.18), rgba(7, 10, 15, 0.44));
-    }
-    .foot {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 14px;
-      align-items: center;
-      justify-content: space-between;
       color: var(--muted);
+      margin-bottom: 6px;
+      letter-spacing:.02em;
+      text-transform: uppercase;
     }
-    .foot .tiny {
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--faint);
+    .field input, .field select, .field textarea{
+      width:100%;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      padding: 10px 10px;
+      font: inherit;
+      outline:none;
+      transition: border-color .14s ease, background .14s ease;
     }
+    .field input:focus, .field select:focus, .field textarea:focus{
+      border-color: rgba(120,166,255,.55);
+      background: rgba(255,255,255,.085);
+    }
+    .field textarea{min-height: 92px; resize: vertical}
 
-    /* Reveal motion */
-    .reveal {
-      opacity: 0;
-      transform: translateY(10px);
-      filter: blur(2px);
-      transition: opacity 0.7s var(--ease), transform 0.7s var(--ease), filter 0.7s var(--ease);
-    }
-    .reveal.in {
-      opacity: 1;
-      transform: translateY(0);
-      filter: blur(0);
-    }
-    .stagger > * {
-      animation: rise 0.8s var(--ease) both;
-    }
-    .stagger > *:nth-child(1) {
-      animation-delay: 0.02s;
-    }
-    .stagger > *:nth-child(2) {
-      animation-delay: 0.1s;
-    }
-    .stagger > *:nth-child(3) {
-      animation-delay: 0.18s;
-    }
-    .stagger > *:nth-child(4) {
-      animation-delay: 0.26s;
-    }
-    .stagger > *:nth-child(5) {
-      animation-delay: 0.34s;
-    }
-    @keyframes rise {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-        filter: blur(3px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-        filter: blur(0);
-      }
-    }
-
-    /* Toast */
-    .toast {
-      position: fixed;
-      left: 50%;
-      bottom: 18px;
-      transform: translateX(-50%) translateY(12px);
-      opacity: 0;
-      pointer-events: none;
-      z-index: 80;
-      border-radius: 999px;
-      border: 1px solid rgba(234, 240, 255, 0.16);
-      background: rgba(13, 20, 40, 0.72);
-      backdrop-filter: blur(10px);
-      box-shadow: 0 18px 60px rgba(0, 0, 0, 0.45);
-      padding: 10px 12px;
-      color: var(--ink);
-      display: flex;
+    .settingsFooter{
+      display:flex;
       gap: 10px;
-      align-items: center;
-      transition: opacity 0.25s var(--ease), transform 0.25s var(--ease);
-      max-width: min(720px, calc(100% - 24px));
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      margin-top: 12px;
     }
-    .toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-    .toast .tag {
-      font-family: var(--mono);
-      font-size: 12px;
-      padding: 3px 8px;
-      border-radius: 999px;
-      border: 1px solid rgba(103, 255, 154, 0.35);
-      color: rgba(103, 255, 154, 0.95);
-      background: rgba(103, 255, 154, 0.1);
-      flex: none;
-    }
-    .toast .msg {
-      font-size: 13px;
-      color: rgba(234, 240, 255, 0.92);
-      line-height: 1.35;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+    .note{
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height: 1.45;
+      max-width: 64ch;
     }
 
-    /* Commands output panel */
-    #commandsPanel {
-      margin-top: 24px;
-      border-radius: var(--radius-md);
-      border: 1px solid rgba(103, 255, 154, 0.35);
-      background: rgba(13, 20, 40, 0.45);
-      padding: 16px;
-      font-family: var(--mono);
-      font-size: 14px;
-      color: var(--lime);
+    /* Generator */
+    .generator{
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+    }
+    .summary{
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+      padding: 14px;
+      display:grid;
+      gap: 10px;
+    }
+    .sumRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      flex-wrap:wrap;
+    }
+    .sumRow b{
+      font-family:"Space Grotesk";
+      font-weight:700;
+      letter-spacing:-.01em;
+      font-size: 13px;
+    }
+    .sumRow span{
+      color: var(--muted);
+      font-size: 12.5px;
+    }
+    .bar{
+      height: 10px;
+      border-radius: 99px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.05);
+      overflow:hidden;
+    }
+    .bar > i{
+      display:block;
+      height:100%;
+      width: 0%;
+      background: linear-gradient(90deg, rgba(120,166,255,.95), rgba(94,242,176,.9));
+      border-radius: 99px;
+      transition: width .22s ease;
+    }
+
+    .log{
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.22);
+      padding: 14px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      color: rgba(234,240,255,.82);
+      font-size: 12px;
+      line-height: 1.55;
       max-height: 220px;
-      overflow-y: auto;
-      white-space: pre-wrap;
-      user-select: text;
-      display: none;
-      position: relative;
+      overflow:auto;
+      white-space:pre-wrap;
     }
-    #commandsPanel h3 {
-      margin-top: 0;
-      margin-bottom: 8px;
-      font-weight: 700;
-      color: var(--teal);
+
+    footer{
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 18px 18px 44px;
+      color: var(--muted2);
+      font-size: 12.5px;
+      display:flex;
+      justify-content:space-between;
+      gap: 12px;
+      flex-wrap:wrap;
     }
-    #copyCommandsBtn {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      background: var(--lime);
-      border: none;
+    footer a{color: rgba(120,166,255,.9); text-decoration:none}
+    footer a:hover{text-decoration:underline}
+
+    /* Toast / modal */
+    .toastWrap{
+      position: fixed;
+      right: 14px;
+      bottom: 14px;
+      z-index: 80;
+      display:grid;
+      gap: 10px;
+      width: min(420px, calc(100vw - 28px));
+    }
+    .toast{
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(10,15,26,.72);
+      backdrop-filter: blur(14px);
+      box-shadow: var(--shadow);
+      padding: 12px 12px;
+      display:flex;
+      gap: 12px;
+      align-items:flex-start;
+      animation: pop .18s ease;
+    }
+    @keyframes pop{
+      from{transform: translateY(6px); opacity:.0}
+      to{transform: translateY(0); opacity:1}
+    }
+    .toast .mark{
+      width: 28px; height: 28px; border-radius: 12px;
+      display:grid; place-items:center;
+      flex:0 0 auto;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+    }
+    .toast.warn .mark{border-color: rgba(255,206,92,.35); background: rgba(255,206,92,.10)}
+    .toast.bad .mark{border-color: rgba(255,90,122,.38); background: rgba(255,90,122,.12)}
+    .toast.good .mark{border-color: rgba(94,242,176,.32); background: rgba(94,242,176,.10)}
+    .toast .content{min-width:0}
+    .toast .content b{
+      display:block;
+      font-family:"Space Grotesk";
+      font-weight:700;
+      font-size: 13px;
+      margin-bottom: 2px;
+      letter-spacing:-.01em;
+    }
+    .toast .content p{
+      margin:0;
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height: 1.45;
+    }
+    .toast .x{
+      margin-left:auto;
+      border:none;
+      background: transparent;
+      color: rgba(234,240,255,.65);
+      cursor:pointer;
+      padding: 6px 8px;
       border-radius: 12px;
-      padding: 6px 12px;
-      font-weight: 700;
-      color: var(--bg0);
-      cursor: pointer;
-      transition: background-color 0.2s ease;
+      transition: background .14s ease, color .14s ease;
     }
-    #copyCommandsBtn:hover {
-      background: var(--teal);
-      color: var(--ink);
+    .toast .x:hover{background: rgba(255,255,255,.06); color: rgba(234,240,255,.88)}
+
+    /* Reveal */
+    .reveal{
+      opacity:0;
+      transform: translateY(10px);
+      animation: rise .6s cubic-bezier(.2,.8,.2,1) forwards;
+    }
+    @keyframes rise{
+      to{opacity:1; transform: translateY(0)}
+    }
+
+    @media (max-width: 960px){
+      .hero{grid-template-columns: 1fr}
+      .workspace{grid-template-columns: 1fr}
+      .brand{min-width: unset}
+      .pill{margin-left:0}
+    }
+    @media (prefers-reduced-motion: reduce){
+      *{animation:none !important; transition:none !important; scroll-behavior:auto !important}
     }
   </style>
 </head>
 
 <body>
-  <div class="grain" aria-hidden="true"></div>
+  <div class="texture" aria-hidden="true"></div>
 
   <header>
-    <div class="nav">
-      <a class="brand" href="#top">
-        <span class="mark" aria-hidden="true"></span>
-        <span>
-          <b>DiscForge</b>
-          <span>OGG + PNG/JSON → Music Disc Mod</span>
-        </span>
-      </a>
+    <div class="topbar">
+      <div class="brand" aria-label="DiscForge">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>DiscForge</h1>
+          <p>Turn .ogg + textures into a vanilla-style Music Disc mod (.jar)</p>
+        </div>
+      </div>
 
-      <nav class="navlinks" aria-label="Primary">
-        <a href="#how">How it works</a>
-        <a href="#generator">Generator</a>
-        <a href="#output">Output</a>
-        <a href="#faq">FAQ</a>
-      </nav>
-
-      <div class="navcta">
-        <span class="chip" title="This page generates a ready-to-compile mod template locally in your browser."
-          >offline-ready</span
-        >
-        <button class="btn primary" id="jumpGenerator" type="button" aria-label="Jump to generator">
-          <span aria-hidden="true">▸</span> Generate
-        </button>
+      <div class="pill" role="status" aria-live="polite">
+        <span class="dot" aria-hidden="true"></span>
+        <div style="display:flex;flex-direction:column;line-height:1.15">
+          <b id="statusTitle">Ready</b>
+          <small id="statusSub">Drop files to begin</small>
+        </div>
       </div>
     </div>
   </header>
 
-  <main id="top" class="wrap">
-    <section class="hero">
-      <div class="heroGrid">
-        <div class="stagger">
+  <main>
+    <div class="hero">
+      <section class="heroCard reveal" style="animation-delay:.05s">
+        <div class="inner">
           <div class="kicker">
-            <span class="badge"
-              ><span class="dot" aria-hidden="true"></span> Forge/Fabric-ready template output</span
-            >
-            <span class="badge"
-              ><span
-                class="dot"
-                aria-hidden="true"
-                style="background: linear-gradient(180deg, var(--violet), var(--rose));
-                box-shadow: 0 0 0 3px rgba(169, 139, 255, 0.12)"
-              ></span
-              > Jukebox + /give + vanilla behavior</span
-            >
+            <span class="badge">All-in-one</span>
+            <span>Upload → review → configure → generate</span>
           </div>
 
-          <h1>
-            Batch convert
-            <span style="color: rgba(103, 255, 154, 0.95)">.ogg</span> +
-            <span style="color: rgba(44, 231, 211, 0.95)">.png/.json</span> into a Minecraft music disc mod.
-          </h1>
-          <p class="lede">
-            Drop your audio files and textures/models, name your discs, and export a complete mod template:
-            items, sounds, lang entries, and the
-            <span style="color: rgba(234, 240, 255, 0.92)">jukebox‑playable</span> music disc behavior.
-            Your discs are obtainable with <code style="font-family: var(--mono)">/give</code> and act like vanilla.
+          <h2 class="heroTitle">
+            Build a <span class="grad">Music Disc mod</span> that behaves like vanilla discs.
+          </h2>
+          <p class="heroDesc">
+            Add your <b>.ogg</b> sound files and matching textures (e.g. <code>apple.ogg</code> + <code>apple.png</code>).
+            DiscForge pairs them by name, warns on duplicates, generates a Java Edition mod JAR layout, and downloads it in one click.
           </p>
 
-          <div class="heroActions">
-            <button class="btn primary" id="startNow" type="button">
-              <span aria-hidden="true">⟡</span> Build mod template
+          <div class="ctaRow">
+            <button class="btn primary" id="btnPick">
+              <span class="icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M12 16V4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <path d="M7 9l5-5 5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M4 20h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </span>
+              Select files
             </button>
-            <button
-              class="btn"
-              id="loadDemo"
-              type="button"
-              title="Populate the generator with example discs (no external files)."
-            >
+
+            <button class="btn" id="btnExample">
+              <span class="icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M5 7h14M5 12h14M5 17h9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </span>
               Load demo set
             </button>
-            <button
-              class="btn"
-              id="copyGiveAll"
-              type="button"
-              title="Copies /give commands for all generated discs."
-            >
-              Copy /give commands
+
+            <button class="btn danger" id="btnClear">
+              <span class="icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M6 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <path d="M9 7V5h6v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <path d="M8 7l1 14h6l1-14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              Reset
             </button>
-          </div>
 
-          <div class="metaRow" aria-label="Key guarantees">
-            <span><i aria-hidden="true"></i> Works in jukebox (music_disc)</span>
-            <span><i aria-hidden="true"></i> One sound event per disc</span>
-            <span><i aria-hidden="true"></i> Batch-friendly naming</span>
-            <span><i aria-hidden="true"></i> No external images</span>
+            <input id="fileInput" type="file" multiple accept=".ogg,.png,.jpg,.jpeg,.webp" />
           </div>
         </div>
+      </section>
 
-        <aside class="console reveal" aria-label="Generator console preview">
-          <div class="consoleTop">
-            <div class="lights" aria-hidden="true"><b></b><b></b><b></b></div>
-            <div class="consoleTitle">
-              <span class="chip">discforge</span>
-              <span>export.log</span>
-            </div>
-          </div>
-
-          <div class="consoleBody">
-            <div
-              class="dropzone"
-              id="dropzone"
-              tabindex="0"
-              role="button"
-              aria-label="Drop files here or choose files"
-            >
-              <div class="dzTop">
-                <div>
-                  <h3>Drop files</h3>
-                  <p>
-                    Drag in many <b>.ogg</b> files (required) and <b>.png</b> and/or <b>.json</b> files (optional).
-                    We’ll match by filename and enforce rules:
-                  </p>
-                  <ul style="color: var(--muted); font-size: 12px; margin: 4px 0 0 18px; padding: 0;">
-                    <li>
-                      If both <code>.png</code> and <code>.json</code> exist for the same base name, an error is logged and that disc is skipped.
-                    </li>
-                    <li>
-                      If only <code>.png</code> exists, a flat item model is generated using that texture.
-                    </li>
-                    <li>
-                      If only <code>.json</code> exists without a matching <code>.png</code>, an error is logged and that disc is skipped.
-                    </li>
-                    <li>
-                      <code>.ogg</code> files are required for each disc.
-                    </li>
-                  </ul>
-                </div>
-                <span class="chip">local</span>
-              </div>
-
-              <div class="filePills" aria-label="Accepted file types">
-                <span class="pill">audio/*.ogg</span>
-                <span class="pill">image/*.png</span>
-                <span class="pill">application/json</span>
-                <span class="pill">zip export</span>
-              </div>
-
-              <div class="dzActions">
-                <label class="btn small" for="filePicker">Choose files</label>
-                <input id="filePicker" type="file" multiple accept=".ogg,.png,.json" />
-                <button class="btn small" type="button" id="clearFiles">Clear</button>
-                <span class="hint" style="margin: 0">
-                  Tip: keep names consistent, e.g.
-                  <code style="font-family: var(--mono)">calm1.ogg</code> +
-                  <code style="font-family: var(--mono)">calm1.png</code> or
-                  <code style="font-family: var(--mono)">calm1.json</code>
-                </span>
-              </div>
-            </div>
-
-            <div class="log" id="log" aria-label="Build log" role="log" aria-live="polite"></div>
-          </div>
-        </aside>
-      </div>
-    </section>
-
-    <section id="how" class="reveal">
-      <div class="sectionHead">
-        <div>
-          <h2>Built for “just like vanilla” behavior</h2>
-          <p>
-            The output is structured around Minecraft’s standard music disc pattern:
-            an item that points to a sound event, and a sound definition that points to your
-            <code style="font-family: var(--mono)">.ogg</code>.
-            In‑game it behaves like a normal disc: insert into a jukebox, it plays, and it’s obtainable via
-            <code style="font-family: var(--mono)">/give</code>.
-            The item model is either your uploaded <code>.json</code> or a generated flat model using your <code>.png</code> texture.
+      <aside class="heroAside reveal" style="animation-delay:.12s">
+        <div class="inner">
+          <h3>How pairing works</h3>
+          <p class="hint">
+            Files are matched by <b>base name</b> (case-insensitive). Example: <code>apple.ogg</code> pairs with <code>apple.png</code>.
+            If there are duplicates (same exact filename), you’ll get a warning.
           </p>
+          <div class="miniSteps" role="list">
+            <div class="step" role="listitem">
+              <div class="num">1</div>
+              <div>
+                <b>Upload</b>
+                <span>Drag & drop .ogg + texture images into the dropzone.</span>
+              </div>
+            </div>
+            <div class="step" role="listitem">
+              <div class="num">2</div>
+              <div>
+                <b>Configure</b>
+                <span>Set mod id, version, namespace, and disc settings.</span>
+              </div>
+            </div>
+            <div class="step" role="listitem">
+              <div class="num">3</div>
+              <div>
+                <b>Generate</b>
+                <span>Download a .jar (zip) with assets + data + JSON scaffolding.</span>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </aside>
+    </div>
 
-      <div class="flow">
-        <article class="row">
-          <div style="position: relative">
-            <h3>1) Import audio + textures/models</h3>
-            <p>
-              Drop a folder’s worth of <b>.ogg</b> files. Optionally add <b>.png</b> textures and/or <b>.json</b> item models.
-              Rules:
-            </p>
-            <ul style="color: var(--muted); font-size: 13px; margin: 4px 0 0 18px; padding: 0;">
-              <li>
-                If both <code>.png</code> and <code>.json</code> exist for the same base name, an error is logged and that disc is skipped.
-              </li>
-              <li>
-                If only <code>.png</code> exists, a flat item model is generated using that texture.
-              </li>
-              <li>
-                If only <code>.json</code> exists without a matching <code>.png</code>, an error is logged and that disc is skipped.
-              </li>
-              <li>
-                <code>.ogg</code> files are required for each disc.
-              </li>
-            </ul>
+    <div class="workspace">
+      <!-- LEFT: Upload & File Lists -->
+      <section class="panel reveal" style="animation-delay:.18s" aria-label="Upload and files">
+        <div class="panelHeader">
+          <div>
+            <h2>Upload & File List</h2>
+            <p>Drop files here. Lists are sorted by type. Pair status is shown per disc candidate.</p>
           </div>
-          <aside class="rowAside" aria-label="Naming convention example">
-            <pre class="code"><span class="muted"># Recommended naming</span>
-<span class="k">mellow_night</span>.ogg
-<span class="k">mellow_night</span>.png
-<span class="k">mellow_night</span>.json (optional, but not with .png)
-
-<span class="muted"># Becomes identifiers</span>
-<span class="t">modid</span>:<span class="n">mellow_night</span>
-<span class="t">sound</span>: <span class="t">modid</span>:<span class="n">music_disc.mellow_night</span></pre>
-          </aside>
-        </article>
-
-        <article class="row">
-          <div style="position: relative">
-            <h3>2) Generate registrations + assets</h3>
-            <p>
-              We produce a clean, compile-ready structure: <b>assets</b> (sounds + lang + models + textures) and <b>code stubs</b> (registries)
-              for either Forge or Fabric style projects. You pick the mod ID, namespace, and a consistent naming scheme.
-            </p>
+          <div style="text-align:right">
+            <div style="font-family:'Space Grotesk';font-weight:700;font-size:12px;color:rgba(234,240,255,.9)">Supported</div>
+            <div style="color:var(--muted);font-size:12px">.ogg · .png/.jpg/.webp</div>
           </div>
-          <aside class="rowAside" aria-label="Sounds JSON example">
-            <pre class="code"><span class="muted">// assets/&lt;modid&gt;/sounds.json</span>
-{
-  "<span class="n">music_disc.mellow_night</span>": {
-    "<span class="k">sounds</span>": [
-      "<span class="n">records/mellow_night</span>"
-    ]
-  }
-}</pre>
-          </aside>
-        </article>
-
-        <article class="row">
-          <div style="position: relative">
-            <h3>3) Use /give + play in jukebox</h3>
-            <p>
-              Each disc item gets a stable identifier, so you can spawn it instantly:
-              <code style="font-family: var(--mono)">/give @p &lt;modid&gt;:&lt;disc_id&gt;</code>.
-              Once in your inventory, it’s a standard music disc item: insert into a jukebox and it plays your <b>.ogg</b>.
-            </p>
-          </div>
-          <aside class="rowAside" aria-label="Give command examples">
-            <pre class="code"><span class="muted"># Give a disc</span>
-/give @p <span class="t">discforge</span>:<span class="n">mellow_night</span>
-
-<span class="muted"># Give multiple</span>
-/give @p <span class="t">discforge</span>:<span class="n">mellow_night</span> <span class="w">3</span>
-
-<span class="muted"># Vanilla-like usage: put in jukebox</span>
-<span class="k">(right-click jukebox)</span></pre>
-          </aside>
-        </article>
-      </div>
-
-      <div class="divider" aria-hidden="true"></div>
-    </section>
-
-    <section id="generator" class="reveal">
-      <div class="sectionHead">
-        <div>
-          <h2>Generator</h2>
-          <p>Configure your mod identity and preview the disc list. Then export a ZIP with a ready-to-place asset tree + registry stubs.</p>
         </div>
-      </div>
 
-      <div class="gen">
-        <div class="panel" aria-label="Disc list panel">
-          <div class="panelHead">
-            <h3>Discs</h3>
-            <div style="display: flex; gap: 10px; align-items: center">
-              <span class="chip" id="countChip">0 discs</span>
-              <button class="btn small" id="autoName" type="button" title="Normalize names into safe identifiers">
-                Normalize IDs
+        <div class="panelBody">
+          <div class="drop" id="dropzone" tabindex="0" role="button" aria-label="Drop files here or click to select">
+            <div class="dropInner">
+              <div class="dropText">
+                <b>Drag & drop your sounds + textures</b>
+                <span>Tip: Keep names aligned. Example: <code>mango.ogg</code> + <code>mango.png</code>.</span>
+              </div>
+              <div class="dropActions">
+                <button class="btn" id="btnPick2">
+                  <span class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path d="M12 16V4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                      <path d="M7 9l5-5 5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M4 20h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                  </span>
+                  Choose files
+                </button>
+                <button class="btn" id="btnAudit">
+                  <span class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path d="M10 14l2 2 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M20 12a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                  </span>
+                  Audit pairs
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="subRow">
+            <div class="stats" aria-label="File counts">
+              <span class="chip"><span class="sw" aria-hidden="true"></span><span><b id="countOgg">0</b> sounds</span></span>
+              <span class="chip"><span class="sw tex" aria-hidden="true"></span><span><b id="countTex">0</b> textures</span></span>
+              <span class="chip"><span class="sw other" aria-hidden="true"></span><span><b id="countOther">0</b> other</span></span>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center">
+              <span class="pillTag" title="How many disc bases are pairable (sound+texture)">
+                <span class="k" aria-hidden="true"></span>
+                <span><b id="pairable">0</b> pairable</span>
+              </span>
+              <span class="pillTag miss" title="Missing sound or missing texture">
+                <span class="k" aria-hidden="true"></span>
+                <span><b id="missing">0</b> missing</span>
+              </span>
+              <span class="pillTag dup" title="Duplicate filenames detected">
+                <span class="k" aria-hidden="true"></span>
+                <span><b id="dups">0</b> duplicates</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="listBlock">
+            <div class="listGroup" aria-label="Disc candidates">
+              <div class="groupHead">
+                <h3>Disc Candidates (by base name)</h3>
+                <div class="meta" id="candMeta">—</div>
+              </div>
+              <div class="items" id="candList"></div>
+            </div>
+
+            <div class="listGroup" aria-label="Raw file list">
+              <div class="groupHead">
+                <h3>Raw Files (sorted by type)</h3>
+                <div class="meta" id="rawMeta">—</div>
+              </div>
+              <div class="items" id="rawList"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT: Settings & Generator -->
+      <div class="generator">
+        <section class="panel reveal" style="animation-delay:.24s" aria-label="Mod file settings">
+          <div class="panelHeader">
+            <div>
+              <h2>Mod Settings</h2>
+              <p>These values are used in generated JSON and folder names. Keep <b>mod id</b> lowercase with underscores.</p>
+            </div>
+          </div>
+          <div class="panelBody">
+            <div class="grid2">
+              <div class="field">
+                <label for="modId">Mod ID</label>
+                <input id="modId" value="discforge_discs" autocomplete="off" spellcheck="false" />
+              </div>
+              <div class="field">
+                <label for="modName">Mod Name</label>
+                <input id="modName" value="DiscForge Discs" autocomplete="off" />
+              </div>
+
+              <div class="field">
+                <label for="modVersion">Mod Version</label>
+                <input id="modVersion" value="1.0.0" autocomplete="off" spellcheck="false" />
+              </div>
+              <div class="field">
+                <label for="mcVersion">Minecraft Version (label)</label>
+                <input id="mcVersion" value="1.20.x" autocomplete="off" spellcheck="false" />
+              </div>
+
+              <div class="field">
+                <label for="namespace">Namespace (assets)</label>
+                <input id="namespace" value="discforge_discs" autocomplete="off" spellcheck="false" />
+              </div>
+              <div class="field">
+                <label for="packFormat">Resource pack format (pack.mcmeta)</label>
+                <select id="packFormat">
+                  <option value="34">34 (1.20.5+)</option>
+                  <option value="32">32 (1.20.2–1.20.4)</option>
+                  <option value="15">15 (1.20–1.20.1)</option>
+                  <option value="13">13 (1.19.4)</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="defaultComparator">Comparator output (default)</label>
+                <input id="defaultComparator" type="number" min="0" max="15" value="1" />
+              </div>
+              <div class="field">
+                <label for="itemRarity">Rarity (label)</label>
+                <select id="itemRarity">
+                  <option value="common">common</option>
+                  <option value="uncommon" selected>uncommon</option>
+                  <option value="rare">rare</option>
+                  <option value="epic">epic</option>
+                </select>
+              </div>
+
+              <div class="field" style="grid-column:1/-1">
+                <label for="desc">Description (pack + mod)</label>
+                <textarea id="desc">Custom music discs generated with DiscForge.</textarea>
+              </div>
+            </div>
+
+            <div class="settingsFooter">
+              <div class="note">
+                Note: Browsers can’t truly “compile” Fabric/Forge mods without a build toolchain. This generator creates a
+                <b>jar-shaped zip</b> containing the <b>assets/data scaffolding</b> you’d use in a real mod project (or as a resourcepack-like structure).
+                You can still import these assets into a proper Fabric/Forge template.
+              </div>
+              <button class="btn" id="btnCopyPlan" title="Copy a build plan to clipboard">
+                <span class="icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M8 7h10v14H8V7Z" stroke="currentColor" stroke-width="2" />
+                    <path d="M6 17H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v1" stroke="currentColor" stroke-width="2" />
+                  </svg>
+                </span>
+                Copy build notes
               </button>
             </div>
           </div>
-          <div class="panelBody">
-            <div class="hint" style="margin-top: 0">
-              Files are matched by base name. Example:
-              <code style="font-family: var(--mono)">track01.ogg</code> pairs with
-              <code style="font-family: var(--mono)">track01.png</code> or
-              <code style="font-family: var(--mono)">track01.json</code>.
-              You can edit titles below—IDs stay stable unless you normalize.
-            </div>
-            <div class="list" id="discList" style="margin-top: 12px" aria-label="Generated discs list">
-              <!-- items injected -->
+        </section>
+
+        <section class="panel reveal" style="animation-delay:.30s" aria-label="Generator">
+          <div class="panelHeader">
+            <div>
+              <h2>Generate .jar</h2>
+              <p>Disc entries are generated from pairs. If a base name is missing a sound or texture, it won’t be included.</p>
             </div>
           </div>
-        </div>
-
-        <div class="panel" aria-label="Settings panel">
-          <div class="panelHead">
-            <h3>Mod settings</h3>
-            <span class="chip">export</span>
-          </div>
           <div class="panelBody">
-            <form class="form" id="settingsForm">
-              <div class="stack">
-                <label for="modid">Mod ID</label>
-                <input
-                  class="field"
-                  id="modid"
-                  name="modid"
-                  value="discforge"
-                  autocomplete="off"
-                  spellcheck="false"
-                />
-                <div class="hint">
-                  Lowercase, no spaces. Used as namespace:
-                  <code style="font-family: var(--mono)">&lt;modid&gt;:&lt;item&gt;</code>
-                </div>
+            <div class="summary" aria-label="Generation summary">
+              <div class="sumRow">
+                <b>Ready discs</b>
+                <span><span id="readyCount">0</span> / <span id="totalCandidates">0</span> candidates</span>
+              </div>
+              <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                <i id="progressBar"></i>
               </div>
 
-              <div class="stack">
-                <label for="packageName">Java package (optional)</label>
-                <input
-                  class="field"
-                  id="packageName"
-                  name="packageName"
-                  value="com.example.discforge"
-                  autocomplete="off"
-                  spellcheck="false"
-                />
-                <div class="hint">Used in generated stubs (you can change later).</div>
+              <div class="sumRow">
+                <b>Output</b>
+                <span id="outName">discforge_discs-1.0.0.jar</span>
               </div>
 
-              <div class="stack">
-                <label for="platform">Target</label>
-                <select class="field" id="platform" name="platform" aria-label="Target platform">
-                  <option value="fabric">Fabric-style stubs</option>
-                  <option value="forge">Forge-style stubs</option>
-                </select>
-                <div class="hint">Both output the same assets; code differs slightly.</div>
+              <div class="ctaRow" style="margin-top:2px">
+                <button class="btn primary" id="btnGenerate">
+                  <span class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path d="M12 3v10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                      <path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M5 21h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                  </span>
+                  Generate & download .jar
+                </button>
+                <button class="btn" id="btnPreview">
+                  <span class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path d="M12 5c5.5 0 10 7 10 7s-4.5 7-10 7S2 12 2 12s4.5-7 10-7Z" stroke="currentColor" stroke-width="2"/>
+                      <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                  </span>
+                  Preview files to be written
+                </button>
               </div>
+            </div>
 
-              <div class="stack">
-                <label for="mcVersion">Minecraft version</label>
-                <input
-                  class="field"
-                  id="mcVersion"
-                  name="mcVersion"
-                  value="1.20.1"
-                  autocomplete="off"
-                  spellcheck="false"
-                />
-                <div class="hint">For README hints and folder naming guidance.</div>
-              </div>
-
-              <div class="stack wide">
-                <label for="discPrefix">Sound path prefix</label>
-                <input
-                  class="field"
-                  id="discPrefix"
-                  name="discPrefix"
-                  value="records/"
-                  autocomplete="off"
-                  spellcheck="false"
-                />
-                <div class="hint">
-                  Your .ogg files will be placed under
-                  <code style="font-family: var(--mono)">assets/&lt;modid&gt;/sounds/&lt;prefix&gt;</code>.
-                </div>
-              </div>
-
-              <div class="formActions wide">
-                <button class="btn primary" id="exportZip" type="button">Export ZIP</button>
-                <button class="btn" id="previewJson" type="button">Preview output</button>
-                <button class="btn" id="copySoundsJson" type="button">Copy sounds.json</button>
-              </div>
-
-              <div class="hint wide" id="exportHint">
-                Export includes: <b>assets</b> tree, <b>sounds.json</b>, <b>en_us.json</b>, item model JSONs, textures, and registry stubs.
-                (You still need to compile the mod in your IDE.)
-              </div>
-            </form>
+            <div class="log" id="log" aria-label="Log output">Waiting for files…</div>
           </div>
-        </div>
+        </section>
       </div>
-
-      <!-- Commands output panel -->
-      <div
-        id="commandsPanel"
-        role="region"
-        aria-live="polite"
-        aria-label="Minecraft /give commands for generated discs"
-      >
-        <h3>Generated Minecraft /give commands</h3>
-        <button id="copyCommandsBtn" type="button" aria-label="Copy all /give commands">Copy All</button>
-        <pre id="commandsText"></pre>
-      </div>
-    </section>
-
-    <section id="output" class="reveal">
-      <div class="sectionHead">
-        <div>
-          <h2>What you get</h2>
-          <p>
-            A ZIP structured like a real mod project’s resources, plus readable code stubs and a checklist.
-            You can paste the generated folders into your existing mod, or use them as a starting point.
-          </p>
-        </div>
-      </div>
-
-      <div class="flow">
-        <article class="row">
-          <div style="position: relative">
-            <h3>Assets tree (ready)</h3>
-            <p>
-              Includes:
-              <code style="font-family: var(--mono)">assets/&lt;modid&gt;/sounds.json</code>,
-              <code style="font-family: var(--mono)">assets/&lt;modid&gt;/sounds/…</code> (<b>.ogg</b>),
-              <code style="font-family: var(--mono)">assets/&lt;modid&gt;/lang/en_us.json</code>,
-              <code style="font-family: var(--mono)">assets/&lt;modid&gt;/models/item/</code> (<b>.json</b>),
-              <code style="font-family: var(--mono)">assets/&lt;modid&gt;/textures/item/</code> (<b>.png</b>)
-            </p>
-          </div>
-          <aside class="rowAside" aria-label="Tree preview">
-            <pre class="code"><span class="muted">assets/</span>
-  <span class="t">&lt;modid&gt;</span>/
-    <span class="k">lang</span>/en_us.json
-    <span class="k">models</span>/item/<span class="n">&lt;disc_id&gt;</span>.json
-    <span class="k">sounds</span>/<span class="n">records/</span><span class="n">&lt;disc_id&gt;</span>.ogg
-    <span class="k">textures</span>/item/<span class="n">&lt;disc_id&gt;</span>.png
-    sounds.json</pre>
-          </aside>
-        </article>
-
-        <article class="row">
-          <div style="position: relative">
-            <h3>Give commands (stable)</h3>
-            <p>
-              Every generated disc is an item you can spawn instantly. Great for testing:
-              no loot tables, no crafting recipes, no tags required.
-              Add recipes later if you want—this template stays clean and vanilla-like.
-            </p>
-          </div>
-          <aside class="rowAside" aria-label="Give command template">
-            <pre class="code"><span class="muted"># Template</span>
-/give @p <span class="t">&lt;modid&gt;</span>:<span class="n">&lt;disc_id&gt;</span>
-
-<span class="muted"># Example</span>
-/give @p <span class="t">discforge</span>:<span class="n">mellow_night</span></pre>
-          </aside>
-        </article>
-
-        <article class="row">
-          <div style="position: relative">
-            <h3>Registry stubs (minimal)</h3>
-            <p>
-              We generate small, readable registration code: item registration, sound event keys, and a “music disc item” definition pointing to your sound.
-              You can merge it into your existing registries and naming conventions.
-            </p>
-          </div>
-          <aside class="rowAside" aria-label="Registry stub preview">
-            <pre class="code"><span class="muted">// Pseudocode outline</span>
-registerSound(<span class="t">modid</span>:<span class="n">music_disc.mellow_night</span>)
-registerItem(<span class="t">modid</span>:<span class="n">mellow_night</span>,
-  new MusicDiscItem(
-    <span class="w">comparatorOutput</span>=<span class="w">1</span>,
-    <span class="w">sound</span>=<span class="n">music_disc.mellow_night</span>,
-    <span class="w">lengthSeconds</span>=<span class="w">178</span>
-  )
-)</pre>
-          </aside>
-        </article>
-      </div>
-    </section>
-
-    <section id="faq" class="reveal">
-      <div class="sectionHead">
-        <div>
-          <h2>FAQ</h2>
-          <p>Practical answers for making discs behave like vanilla and keeping identifiers clean.</p>
-        </div>
-      </div>
-
-      <div class="flow">
-        <article class="row">
-          <div style="position: relative">
-            <h3>Will the discs work in a jukebox?</h3>
-            <p>
-              Yes—when you compile the generated template into a mod, each disc is registered as a music disc item pointing to its sound event.
-              In-game it inserts into a jukebox and plays like a vanilla disc.
-            </p>
-          </div>
-          <aside class="rowAside">
-            <pre class="code"><span class="muted">Key requirements:</span>
-• Item type: <span class="k">MusicDisc</span>
-• Sound event: <span class="k">registered</span>
-• sounds.json: <span class="k">valid</span>
-• .ogg location: <span class="k">assets/&lt;modid&gt;/sounds/…</span></pre>
-          </aside>
-        </article>
-
-        <article class="row">
-          <div style="position: relative">
-            <h3>What about .png/.json?</h3>
-            <p>
-              This generator packages PNG textures and JSON item models.
-              If you upload both PNG and JSON for the same disc, it logs an error and skips that disc.
-              If you upload only PNG, it generates a flat item model JSON referencing that PNG.
-              If you upload only JSON without PNG, it logs an error and skips that disc.
-            </p>
-          </div>
-          <aside class="rowAside">
-            <pre class="code"><span class="muted">Suggested workflow:</span>
-1) Upload .ogg + .png for each disc (recommended)
-2) Optionally upload .json if you want a custom model (but not with .png)
-3) Export and compile your mod</pre>
-          </aside>
-        </article>
-
-        <article class="row">
-          <div style="position: relative">
-            <h3>Do you upload my files?</h3>
-            <p>
-              No. All processing happens locally in your browser session. The ZIP is generated client-side.
-            </p>
-          </div>
-          <aside class="rowAside">
-            <pre class="code"><span class="muted">Privacy model:</span>
-• No network requests
-• No external file hosts
-• Export is a local download</pre>
-          </aside>
-        </article>
-      </div>
-    </section>
+    </div>
   </main>
 
   <footer>
-    <div class="wrap foot">
-      <div>
-        <div style="display: flex; gap: 10px; align-items: center">
-          <span class="mark" aria-hidden="true" style="width: 30px; height: 30px; border-radius: 10px"></span>
-          <div>
-            <div style="font-family: var(--display); font-weight: 800; letter-spacing: -0.2px">
-              DiscForge
-            </div>
-            <div class="tiny">Generate a Minecraft music disc mod template from .ogg and .png/.json.</div>
-          </div>
-        </div>
-      </div>
-      <div class="tiny">
-        Tip: keep filenames clean → stable IDs → stable
-        <code style="font-family: var(--mono)">/give</code> commands.
-      </div>
+    <div>
+      <b style="font-family:'Space Grotesk';color:rgba(234,240,255,.86)">DiscForge</b>
+      <span> — Local-only in your browser. No uploads.</span>
+    </div>
+    <div>
+      <span>Tip: Use unique names.</span>
+      <span> Duplicate filenames trigger a warning popup.</span>
     </div>
   </footer>
 
-  <div
-    class="toast"
-    id="toast"
-    role="status"
-    aria-live="polite"
-    aria-atomic="true"
-  >
-    <span class="tag">copied</span>
-    <span class="msg" id="toastMsg">Text copied to clipboard.</span>
-  </div>
+  <div class="toastWrap" id="toasts" aria-live="polite" aria-relevant="additions"></div>
 
   <script>
-    // ---------- Utilities ----------
-    const $ = (sel, root = document) => root.querySelector(sel);
-    const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+    /* =========================
+       DiscForge — Client-side generator
+       Note: Produces a .jar-shaped ZIP with assets/data scaffolding.
+       ========================= */
 
-    function clampStr(v, max = 140) {
-      const s = String(v ?? "");
-      return s.length > max ? s.slice(0, max - 1) + "…" : s;
-    }
-
-    function slugify(input) {
-      // Minecraft-ish resource location safe: lowercase, numbers, underscore, slash, dot allowed (we'll keep underscore only for item IDs)
-      return (
-        String(input ?? "")
-          .trim()
-          .toLowerCase()
-          .replace(/\.[^/.]+$/, "") // remove extension
-          .replace(/['"]/g, "")
-          .replace(/[^a-z0-9]+/g, "_")
-          .replace(/^_+|_+$/g, "")
-          .replace(/__+/g, "_")
-          .slice(0, 64) || "disc"
-      );
-    }
-
-    function safeModId(input) {
-      return (
-        String(input ?? "")
-          .trim()
-          .toLowerCase()
-          .replace(/[^a-z0-9_\-]/g, "_")
-          .replace(/^_+|_+$/g, "")
-          .replace(/__+/g, "_")
-          .slice(0, 64) || "modid"
-      );
-    }
-
-    function toast(msg) {
-      const t = $("#toast");
-      $("#toastMsg").textContent = msg;
-      t.classList.add("show");
-      clearTimeout(toast._timer);
-      toast._timer = setTimeout(() => t.classList.remove("show"), 2200);
-    }
-
-    async function copyText(text) {
-      try {
-        await navigator.clipboard.writeText(text);
-        toast("Copied to clipboard.");
-      } catch (e) {
-        // Fallback
-        const ta = document.createElement("textarea");
-        ta.value = text;
-        ta.style.position = "fixed";
-        ta.style.left = "-9999px";
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand("copy");
-        ta.remove();
-        toast("Copied (fallback).");
+    // ---------- Small helpers ----------
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const el = (tag, attrs={}) => {
+      const n = document.createElement(tag);
+      for (const [k,v] of Object.entries(attrs)){
+        if (k === "class") n.className = v;
+        else if (k === "text") n.textContent = v;
+        else if (k.startsWith("on") && typeof v === "function") n.addEventListener(k.slice(2), v);
+        else n.setAttribute(k, v);
       }
+      return n;
+    };
+    const clamp = (n, a, b) => Math.min(b, Math.max(a, n));
+    const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
+
+    function sanitizeModId(s){
+      return (s||"").toLowerCase().trim().replace(/\s+/g,"_").replace(/[^a-z0-9_]/g,"_").replace(/_+/g,"_").replace(/^_+|_+$/g,"");
+    }
+    function baseName(fileName){
+      const i = fileName.lastIndexOf(".");
+      return (i>=0?fileName.slice(0,i):fileName).toLowerCase();
+    }
+    function ext(fileName){
+      const i = fileName.lastIndexOf(".");
+      return (i>=0?fileName.slice(i+1):"").toLowerCase();
+    }
+    function prettyBytes(bytes){
+      const u = ["B","KB","MB","GB"];
+      let i=0, n=bytes;
+      while(n>=1024 && i<u.length-1){ n/=1024; i++; }
+      return `${n.toFixed(i?1:0)} ${u[i]}`;
     }
 
-    function logLine(text, cls = "muted") {
-      const log = $("#log");
-      const p = document.createElement("p");
-      p.className = "logLine " + cls;
-      p.textContent = text;
-      log.appendChild(p);
-      log.scrollTop = log.scrollHeight;
+    // ---------- Toasts ----------
+    function toast(type, title, msg, ttl=5200){
+      const wrap = $("#toasts");
+      const t = el("div", {class:`toast ${type}`});
+      const mark = el("div", {class:"mark", "aria-hidden":"true"});
+      mark.innerHTML = type === "warn" ? "!" : type === "bad" ? "×" : "✓";
+      const content = el("div", {class:"content"});
+      content.append(el("b",{text:title}));
+      content.append(el("p",{text:msg}));
+      const x = el("button",{class:"x", type:"button", "aria-label":"Dismiss notification"});
+      x.textContent = "Close";
+      x.addEventListener("click", ()=> t.remove());
+      t.append(mark, content, x);
+      wrap.append(t);
+      if (ttl) setTimeout(()=> t.remove(), ttl);
     }
 
     // ---------- State ----------
-    const state = {
-      ogg: new Map(), // base -> File
-      png: new Map(), // base -> File
-      json: new Map(), // base -> File
-      discs: [], // {id, title, oggFileName, pngFileName?, jsonFileName?, skip:boolean}
-    };
+    /** @type {Map<string, File[]>} */
+    const filesByName = new Map(); // exact name -> files (to detect duplicates)
+    /** @type {File[]} */
+    let allFiles = [];
 
-    // ---------- DOM refs ----------
+    // ---------- UI refs ----------
+    const fileInput = $("#fileInput");
     const dropzone = $("#dropzone");
-    const filePicker = $("#filePicker");
-    const discList = $("#discList");
-    const countChip = $("#countChip");
 
-    const modidEl = $("#modid");
-    const platformEl = $("#platform");
-    const packageEl = $("#packageName");
-    const mcVerEl = $("#mcVersion");
-    const prefixEl = $("#discPrefix");
+    const countOgg = $("#countOgg");
+    const countTex = $("#countTex");
+    const countOther = $("#countOther");
 
-    const commandsPanel = $("#commandsPanel");
-    const commandsText = $("#commandsText");
-    const copyCommandsBtn = $("#copyCommandsBtn");
+    const pairable = $("#pairable");
+    const missing = $("#missing");
+    const dups = $("#dups");
 
-    // ---------- Reveal on scroll ----------
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) e.target.classList.add("in");
-        }
-      },
-      { threshold: 0.12 }
-    );
-    $$(".reveal").forEach((el) => io.observe(el));
+    const candList = $("#candList");
+    const rawList = $("#rawList");
+    const candMeta = $("#candMeta");
+    const rawMeta = $("#rawMeta");
 
-    // ---------- File intake ----------
-    function ingestFiles(fileList) {
-      const files = Array.from(fileList || []);
-      if (!files.length) return;
+    const statusTitle = $("#statusTitle");
+    const statusSub = $("#statusSub");
 
-      let addedOgg = 0,
-        addedPng = 0,
-        addedJson = 0,
-        ignored = 0;
+    const readyCount = $("#readyCount");
+    const totalCandidates = $("#totalCandidates");
+    const progressBar = $("#progressBar");
+    const outName = $("#outName");
+    const logEl = $("#log");
 
-      for (const f of files) {
-        const name = f.name || "";
-        const lower = name.toLowerCase();
-        if (lower.endsWith(".ogg")) {
-          const base = name.replace(/\.ogg$/i, "");
-          state.ogg.set(base, f);
-          addedOgg++;
-        } else if (lower.endsWith(".png")) {
-          const base = name.replace(/\.png$/i, "");
-          state.png.set(base, f);
-          addedPng++;
-        } else if (lower.endsWith(".json")) {
-          const base = name.replace(/\.json$/i, "");
-          state.json.set(base, f);
-          addedJson++;
-        } else {
-          ignored++;
+    const modIdEl = $("#modId");
+    const modNameEl = $("#modName");
+    const modVersionEl = $("#modVersion");
+    const mcVersionEl = $("#mcVersion");
+    const namespaceEl = $("#namespace");
+    const packFormatEl = $("#packFormat");
+    const defaultComparatorEl = $("#defaultComparator");
+    const itemRarityEl = $("#itemRarity");
+    const descEl = $("#desc");
+
+    // ---------- Pair computation ----------
+    function computeModel(){
+      const sounds = [];
+      const textures = [];
+      const others = [];
+
+      const dupNames = [];
+      for (const [name, list] of filesByName.entries()){
+        if (list.length > 1) dupNames.push({name, count:list.length});
+      }
+
+      for (const f of allFiles){
+        const e = ext(f.name);
+        if (e === "ogg") sounds.push(f);
+        else if (["png","jpg","jpeg","webp"].includes(e)) textures.push(f);
+        else others.push(f);
+      }
+
+      // base -> {sound?:File, texture?:File, issues:[]}
+      const map = new Map();
+      function ensure(b){
+        if (!map.has(b)) map.set(b, {base:b, sound:null, texture:null, soundName:"", texName:"", issues:[]});
+        return map.get(b);
+      }
+
+      // For pairing: if multiple sounds share same base, keep first, flag issue.
+      const baseSoundCount = new Map();
+      for (const s of sounds){
+        const b = baseName(s.name);
+        const entry = ensure(b);
+        baseSoundCount.set(b, (baseSoundCount.get(b)||0)+1);
+        if (!entry.sound) { entry.sound = s; entry.soundName = s.name; }
+      }
+      const baseTexCount = new Map();
+      for (const t of textures){
+        const b = baseName(t.name);
+        const entry = ensure(b);
+        baseTexCount.set(b, (baseTexCount.get(b)||0)+1);
+        if (!entry.texture) { entry.texture = t; entry.texName = t.name; }
+      }
+
+      for (const [b, entry] of map.entries()){
+        const sc = baseSoundCount.get(b)||0;
+        const tc = baseTexCount.get(b)||0;
+        if (sc > 1) entry.issues.push(`Multiple sounds share base "${b}" (${sc}). Using first.`);
+        if (tc > 1) entry.issues.push(`Multiple textures share base "${b}" (${tc}). Using first.`);
+        if (!entry.sound) entry.issues.push("Missing .ogg");
+        if (!entry.texture) entry.issues.push("Missing texture");
+      }
+
+      const candidates = [...map.values()].sort((a,b)=>a.base.localeCompare(b.base));
+      const ready = candidates.filter(c=>c.sound && c.texture);
+      const miss = candidates.length - ready.length;
+
+      return {sounds, textures, others, dupNames, candidates, ready, miss};
+    }
+
+    // ---------- Rendering ----------
+    function setStatus(title, sub){
+      statusTitle.textContent = title;
+      statusSub.textContent = sub;
+    }
+
+    function render(){
+      const m = computeModel();
+
+      countOgg.textContent = m.sounds.length;
+      countTex.textContent = m.textures.length;
+      countOther.textContent = m.others.length;
+
+      pairable.textContent = m.ready.length;
+      missing.textContent = m.miss;
+      dups.textContent = m.dupNames.length;
+
+      candMeta.textContent = `${m.candidates.length} base name(s)`;
+      rawMeta.textContent = `${allFiles.length} file(s)`;
+
+      // Output name
+      const modId = sanitizeModId(modIdEl.value) || "disc_mod";
+      const ver = (modVersionEl.value || "1.0.0").trim() || "1.0.0";
+      outName.textContent = `${modId}-${ver}.jar`;
+
+      // Progress
+      const pct = m.candidates.length ? Math.round((m.ready.length / m.candidates.length) * 100) : 0;
+      progressBar.style.width = `${pct}%`;
+      progressBar.parentElement.setAttribute("aria-valuenow", String(pct));
+      readyCount.textContent = m.ready.length;
+      totalCandidates.textContent = m.candidates.length;
+
+      // Candidates list (not a card grid; a structured list)
+      candList.innerHTML = "";
+      if (!m.candidates.length){
+        candList.append(el("div",{class:"item", style:"opacity:.75"}));
+        candList.lastChild.append(
+          el("div",{class:"name"}),
+          el("div",{class:"pillTag miss"})
+        );
+        candList.lastChild.querySelector(".name").append(
+          el("b",{text:"No candidates yet"}),
+          el("small",{text:"Add .ogg + textures to create disc entries."})
+        );
+        candList.lastChild.querySelector(".pillTag").append(
+          el("span",{class:"k","aria-hidden":"true"}),
+          el("span",{text:"Waiting"})
+        );
+      } else {
+        for (const c of m.candidates){
+          const ok = !!(c.sound && c.texture);
+          const it = el("div",{class:"item"});
+          const left = el("div",{class:"name"});
+          left.append(
+            el("b",{text:c.base}),
+            el("small",{text:`sound: ${c.sound ? c.soundName : "—"} · texture: ${c.texture ? c.texName : "—"}`})
+          );
+
+          let tag;
+          if (ok) tag = el("div",{class:"pillTag"});
+          else tag = el("div",{class:"pillTag miss"});
+          tag.append(el("span",{class:"k","aria-hidden":"true"}));
+          tag.append(el("span",{text: ok ? "Paired" : "Missing"}));
+
+          if (c.issues.length){
+            it.title = c.issues.join("\n");
+          }
+          it.append(left, tag);
+          candList.append(it);
         }
       }
 
-      buildDiscsFromMaps();
-      renderDiscs();
+      // Raw files sorted by type then name
+      const typeOrder = (f)=>{
+        const e = ext(f.name);
+        if (e==="ogg") return 0;
+        if (["png","jpg","jpeg","webp"].includes(e)) return 1;
+        return 2;
+      };
+      const sorted = [...allFiles].sort((a,b)=>{
+        const ta = typeOrder(a), tb = typeOrder(b);
+        if (ta!==tb) return ta-tb;
+        return a.name.localeCompare(b.name);
+      });
 
-      logLine(
-        `[import] +${addedOgg} .ogg, +${addedPng} .png, +${addedJson} .json${
-          ignored ? `, ignored ${ignored}` : ""
-        }`,
-        "ok"
-      );
-      if (addedOgg === 0) logLine(`[err] No .ogg files imported. Discs require audio.`, "err");
-      if (addedPng === 0 && addedJson > 0)
-        logLine(
-          `[warn] You added .json files but no .png files. .json without .png will cause errors.`,
-          "warn"
+      rawList.innerHTML = "";
+      if (!sorted.length){
+        rawList.append(el("div",{class:"item", style:"opacity:.75"}));
+        rawList.lastChild.append(
+          el("div",{class:"name"}),
+          el("div",{class:"pillTag miss"})
         );
-      if (addedPng > 0 && addedJson > 0)
-        logLine(
-          `[hint] Discs with both .png and .json for the same base name will be skipped with error.`,
-          "muted"
+        rawList.lastChild.querySelector(".name").append(
+          el("b",{text:"No files uploaded"}),
+          el("small",{text:"Use Select files or drag & drop into the dropzone."})
         );
-    }
-
-    function buildDiscsFromMaps() {
-      // Discs are driven by .ogg files.
-      const bases = Array.from(state.ogg.keys()).sort((a, b) => a.localeCompare(b));
-      state.discs = [];
-
-      for (const base of bases) {
-        const hasPng = state.png.has(base);
-        const hasJson = state.json.has(base);
-        const oggFile = state.ogg.get(base);
-
-        let skip = false;
-
-        // Error if both png and json exist for same base
-        if (hasPng && hasJson) {
-          logLine(
-            `[err] Conflict for "${base}": both .png and .json exist. Skipping this disc.`,
-            "err"
+        rawList.lastChild.querySelector(".pillTag").append(
+          el("span",{class:"k","aria-hidden":"true"}),
+          el("span",{text:"Empty"})
+        );
+      } else {
+        for (const f of sorted){
+          const e = ext(f.name);
+          const isOgg = e==="ogg";
+          const isTex = ["png","jpg","jpeg","webp"].includes(e);
+          const kind = isOgg ? "sound" : isTex ? "texture" : "other";
+          const it = el("div",{class:"item"});
+          const left = el("div",{class:"name"});
+          left.append(
+            el("b",{text:f.name}),
+            el("small",{text:`${kind} · ${prettyBytes(f.size)}`})
           );
-          skip = true;
+          const tag = el("div",{class:"pillTag" + (kind==="other" ? " miss": "")});
+          tag.append(el("span",{class:"k","aria-hidden":"true"}));
+          tag.append(el("span",{text: kind}));
+          it.append(left, tag);
+          rawList.append(it);
         }
-        // Error if json exists but no png (texture missing)
-        else if (!hasPng && hasJson) {
-          logLine(
-            `[err] Missing .png for "${base}" but .json exists. Skipping this disc.`,
-            "err"
-          );
-          skip = true;
-        }
-        // Warn if no png or json (no texture/model)
-        else if (!hasPng && !hasJson) {
-          logLine(
-            `[warn] No .png or .json found for "${base}". Disc will use default flat texture.`,
-            "warn"
-          );
-        }
+      }
 
-        const id = slugify(base);
-        const title = base
-          .replace(/[_\-]+/g, " ")
-          .replace(/\s+/g, " ")
-          .trim()
-          .replace(/\b\w/g, (m) => m.toUpperCase());
-
-        state.discs.push({
-          base,
-          id,
-          title: title || id,
-          oggFileName: oggFile?.name || `${base}.ogg`,
-          pngFileName: hasPng ? state.png.get(base).name : null,
-          jsonFileName: hasJson ? state.json.get(base).name : null,
-          skip,
-        });
+      // Log status
+      if (!allFiles.length){
+        logEl.textContent = "Waiting for files…\n\n• Add .ogg sounds and matching textures.\n• Files are paired by base name.\n• Duplicate filenames trigger a warning popup.";
+        setStatus("Ready", "Drop files to begin");
+      } else {
+        setStatus("Files loaded", `${m.ready.length} paired · ${m.miss} missing · ${m.dupNames.length} duplicate filename(s)`);
       }
     }
 
-    function renderDiscs() {
-      discList.innerHTML = "";
-      const validDiscs = state.discs.filter((d) => !d.skip);
-      const n = validDiscs.length;
-      countChip.textContent = `${n} disc${n === 1 ? "" : "s"}`;
+    function addFiles(fileList){
+      const incoming = [...fileList];
+      if (!incoming.length) return;
 
-      if (!n) {
-        const empty = document.createElement("div");
-        empty.className = "hint";
-        empty.style.marginTop = "6px";
-        empty.innerHTML = `No valid discs yet. Add <code style="font-family:var(--mono)">.ogg</code> files with matching <code>.png</code> or <code>.json</code> files to populate the list.`;
-        discList.appendChild(empty);
+      // Detect exact duplicate filenames (same name, any type)
+      const dupHit = [];
+      for (const f of incoming){
+        const key = f.name;
+        if (!filesByName.has(key)) filesByName.set(key, []);
+        filesByName.get(key).push(f);
+        if (filesByName.get(key).length === 2){
+          dupHit.push(key);
+        }
+      }
+
+      allFiles = [...filesByName.values()].flat();
+
+      if (dupHit.length){
+        toast("warn", "Duplicate filenames detected",
+          `These names appeared more than once: ${dupHit.slice(0,4).join(", ")}${dupHit.length>4 ? ` (+${dupHit.length-4} more)` : ""}.`,
+          8000
+        );
+      }
+
+      render();
+    }
+
+    function clearAll(){
+      filesByName.clear();
+      allFiles = [];
+      render();
+      toast("good","Reset complete","All uploaded files were cleared.");
+    }
+
+    // ---------- Dropzone ----------
+    function dropActive(on){
+      dropzone.style.borderColor = on ? "rgba(120,166,255,.55)" : "rgba(255,255,255,.20)";
+      dropzone.style.background = on
+        ? "radial-gradient(800px 240px at 50% 0%, rgba(120,166,255,.18), transparent 60%), rgba(0,0,0,.22)"
+        : "radial-gradient(800px 240px at 50% 0%, rgba(120,166,255,.12), transparent 60%), rgba(0,0,0,.22)";
+    }
+
+    ["dragenter","dragover"].forEach(evt=>{
+      dropzone.addEventListener(evt, (e)=>{
+        e.preventDefault();
+        dropActive(true);
+      });
+    });
+    ["dragleave","drop"].forEach(evt=>{
+      dropzone.addEventListener(evt, (e)=>{
+        e.preventDefault();
+        dropActive(false);
+      });
+    });
+    dropzone.addEventListener("drop",(e)=>{
+      const dt = e.dataTransfer;
+      if (dt && dt.files) addFiles(dt.files);
+    });
+    dropzone.addEventListener("click", ()=> fileInput.click());
+    dropzone.addEventListener("keydown",(e)=>{
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileInput.click(); }
+    });
+
+    // ---------- Buttons ----------
+    $("#btnPick").addEventListener("click", ()=> fileInput.click());
+    $("#btnPick2").addEventListener("click", ()=> fileInput.click());
+    fileInput.addEventListener("change", ()=> addFiles(fileInput.files));
+
+    $("#btnClear").addEventListener("click", clearAll);
+
+    $("#btnAudit").addEventListener("click", ()=>{
+      const m = computeModel();
+      if (!allFiles.length){
+        toast("warn","Nothing to audit","Add files first.");
         return;
       }
-
-      for (const disc of state.discs) {
-        const row = document.createElement("div");
-        row.className = "item";
-        if (disc.skip) row.style.opacity = "0.5";
-        row.dataset.id = disc.id;
-
-        const icon = document.createElement("div");
-        icon.className = "discIcon";
-        icon.setAttribute("aria-hidden", "true");
-
-        const main = document.createElement("div");
-        const title = document.createElement("b");
-        title.textContent = disc.title;
-
-        const meta = document.createElement("small");
-        let metaText = `${disc.id} • ${disc.oggFileName}`;
-        if (disc.pngFileName) metaText += ` + ${disc.pngFileName}`;
-        if (disc.jsonFileName) metaText += ` + ${disc.jsonFileName}`;
-        if (disc.skip) metaText += " (skipped)";
-        meta.textContent = metaText;
-
-        main.appendChild(title);
-        main.appendChild(meta);
-
-        const actions = document.createElement("div");
-        actions.className = "actions";
-
-        const btnGive = document.createElement("button");
-        btnGive.className = "iconBtn";
-        btnGive.type = "button";
-        btnGive.title = "Copy /give command";
-        btnGive.setAttribute("aria-label", `Copy /give command for ${disc.id}`);
-        btnGive.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M8 7a3 3 0 0 1 3-3h7a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3h-7a3 3 0 0 1-3-3V7Z" stroke="rgba(234,240,255,.85)" stroke-width="1.7"/>
-          <path d="M6 20H5a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3h1" stroke="rgba(103,255,154,.85)" stroke-width="1.7" stroke-linecap="round"/>
-        </svg>`;
-        btnGive.addEventListener("click", () => {
-          if (disc.skip) {
-            toast("Cannot give skipped disc.");
-            return;
-          }
-          const modid = safeModId(modidEl.value);
-          copyText(`/give @p ${modid}:${disc.id}`);
-        });
-
-        const btnEdit = document.createElement("button");
-        btnEdit.className = "iconBtn";
-        btnEdit.type = "button";
-        btnEdit.title = "Edit title/ID";
-        btnEdit.setAttribute("aria-label", `Edit title and id for ${disc.id}`);
-        btnEdit.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0 0-3L16.5 4a2.1 2.1 0 0 0-3 0L3 14.5V20Z" stroke="rgba(234,240,255,.85)" stroke-width="1.7" stroke-linejoin="round"/>
-          <path d="M12.5 6.5 17.5 11.5" stroke="rgba(44,231,211,.9)" stroke-width="1.7" stroke-linecap="round"/>
-        </svg>`;
-        btnEdit.addEventListener("click", () => {
-          if (disc.skip) {
-            toast("Cannot edit skipped disc.");
-            return;
-          }
-          const newTitle = prompt("Disc title (display name):", disc.title);
-          if (newTitle !== null) {
-            disc.title = newTitle.trim() || disc.title;
-          }
-          const newId = prompt("Disc ID (resource location path):", disc.id);
-          if (newId !== null) {
-            disc.id = slugify(newId);
-          }
-          renderDiscs();
-          logLine(
-            `[edit] ${disc.base} → id="${disc.id}", title="${clampStr(disc.title, 40)}"`,
-            "ok"
-          );
-        });
-
-        actions.appendChild(btnGive);
-        actions.appendChild(btnEdit);
-
-        row.appendChild(icon);
-        row.appendChild(main);
-        row.appendChild(actions);
-        discList.appendChild(row);
-      }
-    }
-
-    // Drag & drop behavior
-    function setDrag(on) {
-      dropzone.classList.toggle("isDrag", !!on);
-    }
-    ["dragenter", "dragover"].forEach((evt) => {
-      dropzone.addEventListener(evt, (e) => {
-        e.preventDefault();
-        setDrag(true);
-      });
-    });
-    ["dragleave", "drop"].forEach((evt) => {
-      dropzone.addEventListener(evt, (e) => {
-        e.preventDefault();
-        setDrag(false);
-      });
-    });
-    dropzone.addEventListener("drop", (e) => {
-      ingestFiles(e.dataTransfer.files);
-    });
-    dropzone.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        filePicker.click();
-      }
-    });
-    dropzone.addEventListener("click", () => filePicker.click());
-    filePicker.addEventListener("change", () => ingestFiles(filePicker.files));
-
-    $("#clearFiles").addEventListener("click", () => {
-      state.ogg.clear();
-      state.png.clear();
-      state.json.clear();
-      state.discs = [];
-      renderDiscs();
-      commandsPanel.style.display = "none";
-      commandsText.textContent = "";
-      logLine(`[clear] Cleared imported files.`, "warn");
-    });
-
-    // ---------- Output generation ----------
-    function buildSoundsJson(modid) {
-      const obj = {};
-      for (const d of state.discs) {
-        if (d.skip) continue;
-        obj[`music_disc.${d.id}`] = { sounds: [`${prefixEl.value || "records/"}${d.id}`] };
-      }
-      return JSON.stringify(obj, null, 2) + "\n";
-    }
-
-    function buildLangJson(modid) {
-      const obj = {};
-      for (const d of state.discs) {
-        if (d.skip) continue;
-        obj[`item.${modid}.${d.id}`] = d.title;
-      }
-      return JSON.stringify(obj, null, 2) + "\n";
-    }
-
-    function buildItemModelJson(modid, disc) {
-      // If disc has a .json file, we will use the uploaded JSON file content (handled in export)
-      // If no .json but has .png, generate flat item model JSON referencing the png texture
-      if (disc.jsonFileName) {
-        // Placeholder: actual JSON content will be from uploaded file
-        return null;
-      }
-      // Generate flat item model JSON
-      return JSON.stringify(
-        {
-          parent: "item/generated",
-          textures: {
-            layer0: `${modid}:item/${disc.id}`,
-          },
-        },
-        null,
-        2
-      ) + "\n";
-    }
-
-    function buildReadme(modid) {
-      const platform = platformEl.value;
-      const mc = mcVerEl.value.trim() || "1.xx";
-      const pkg = packageEl.value.trim() || "(your.package.here)";
-      const giveLines = state.discs
-        .filter((d) => !d.skip)
-        .slice(0, 10)
-        .map((d) => `/give @p ${modid}:${d.id}`)
-        .join("\n");
-
-      return `# ${modid} — Music Disc Pack (generated)
-
-Target: ${platform} stubs
-Minecraft: ${mc}
-
-This export contains:
-- assets/${modid}/sounds.json
-- assets/${modid}/sounds/${prefixEl.value || "records/"}*.ogg
-- assets/${modid}/lang/en_us.json
-- assets/${modid}/models/item/*.json
-- assets/${modid}/textures/item/*.png
-- stubs/ (registration examples)
-
-## Jukebox behavior
-Each disc is a Music Disc item that references a sound event:
-- sound id: ${modid}:music_disc.<disc_id>
-- ogg path: assets/${modid}/sounds/${prefixEl.value || "records/"}<disc_id>.ogg
-
-## /give testing
-${giveLines || "(import .ogg files to generate commands)"}
-
-## Next steps
-1) Copy the assets/ folder into your mod project resources.
-2) Register items + sound events using the stub for your platform.
-3) Build and run. Insert the disc into a jukebox to play it.
-
-Package hint for code stubs: ${pkg}
-`;
-    }
-
-    function buildStubs(modid) {
-      const pkg = packageEl.value.trim() || "com.example.mod";
-      const discs = state.discs.filter((d) => !d.skip);
-      const platform = platformEl.value;
-
-      const commonHeader = `// Generated by DiscForge — minimal registration stubs
-// ModID: ${modid}
-// NOTE: Integrate into your existing registries / initializer patterns.
-`;
-
-      let fileName = "";
-      let content = "";
-
-      if (platform === "fabric") {
-        fileName = `stubs/${modid}/DiscforgeRegistry_FABRIC.java`;
-        content = `${commonHeader}
-package ${pkg};
-
-public final class DiscforgeRegistry_FABRIC {
-
-  // PSEUDOCODE (adjust to your Yarn mappings / API version)
-  // - Register SoundEvents: ${modid}:music_disc.<id>
-  // - Register Items: ${modid}:<id> as MusicDiscItem pointing to that SoundEvent
-
-  public static void registerAll() {
-${discs
-  .map(
-    (d) =>
-      `    // registerSound("${modid}:music_disc.${d.id}");\n    // registerItem("${modid}:${d.id}", /* new MusicDiscItem(sound=music_disc.${d.id}) */);\n`
-  )
-  .join("\n")}
-  }
-
-  private DiscforgeRegistry_FABRIC() {}
-}
-`;
+      if (m.dupNames.length){
+        toast("warn","Audit: duplicates",
+          `Duplicate exact filenames found: ${m.dupNames.slice(0,4).map(x=>`${x.name}×${x.count}`).join(", ")}${m.dupNames.length>4?` (+${m.dupNames.length-4} more)`:""}.`,
+          9000
+        );
       } else {
-        fileName = `stubs/${modid}/DiscforgeRegistry_FORGE.java`;
-        content = `${commonHeader}
-package ${pkg};
-
-public final class DiscforgeRegistry_FORGE {
-
-  // PSEUDOCODE (adjust to your Forge version / DeferredRegister setup)
-  // - DeferredRegister<SoundEvent> : ${modid}:music_disc.<id>
-  // - DeferredRegister<Item> : ${modid}:<id> as RecordItem/MusicDiscItem
-
-  public static void registerAll() {
-${discs
-  .map(
-    (d) =>
-      `    // SOUND_EVENTS.register("music_disc.${d.id}", () -> new SoundEvent(new ResourceLocation("${modid}", "music_disc.${d.id}")));\n    // ITEMS.register("${d.id}", () -> new RecordItem(/* comparator */1, /* sound */ MUSIC_DISC_${d.id.toUpperCase()}, new Item.Properties().stacksTo(1), /* length */ 180));\n`
-  )
-  .join("\n")}
-  }
-
-  private DiscforgeRegistry_FORGE() {}
-}
-`;
+        toast("good","Audit: OK","No duplicate filenames detected.");
       }
-
-      return [{ path: fileName, data: content }];
-    }
-
-    // ---------- Minimal ZIP writer (store only) ----------
-    // No external libs. Produces a simple ZIP with "stored" entries (no compression).
-    // Enough for production-grade downloads in modern browsers.
-    function crc32(buf) {
-      let c = 0xffffffff;
-      for (let i = 0; i < buf.length; i++) {
-        c = (c >>> 8) ^ CRC_TABLE[(c ^ buf[i]) & 0xff];
+      if (m.miss){
+        toast("warn","Audit: missing pairs", `${m.miss} candidate(s) are missing a sound or texture. Hover a candidate to see details.`);
+      } else if (m.ready.length){
+        toast("good","Audit: ready", `All ${m.ready.length} candidates are paired.`);
       }
-      return (c ^ 0xffffffff) >>> 0;
-    }
-    const CRC_TABLE = (() => {
-      const table = new Uint32Array(256);
-      for (let i = 0; i < 256; i++) {
-        let c = i;
-        for (let k = 0; k < 8; k++) {
-          c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+      logEl.textContent =
+        `Audit report\n` +
+        `— files: ${allFiles.length}\n` +
+        `— sounds: ${m.sounds.length}\n` +
+        `— textures: ${m.textures.length}\n` +
+        `— candidates: ${m.candidates.length}\n` +
+        `— paired: ${m.ready.length}\n` +
+        `— missing: ${m.miss}\n` +
+        `— duplicate exact filenames: ${m.dupNames.length}\n`;
+    });
+
+    // Demo set (creates in-memory files)
+    $("#btnExample").addEventListener("click", async ()=>{
+      clearAll();
+      const mkFile = (name, bytes, type) => new File([bytes], name, {type});
+
+      // Minimal valid OGG header bytes? Not truly playable, but for demo structure.
+      // For real usage, upload actual .ogg files.
+      const fakeOgg = new Uint8Array([0x4F,0x67,0x67,0x53, 0x00,0x02,0x00,0x00,0x00,0x00,0x00,0x00, 0x00,0x00,0x00,0x00]);
+      // Tiny 1x1 PNG
+      const tinyPng = Uint8Array.from(atob(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO2lZpQAAAAASUVORK5CYII="
+      ), c=>c.charCodeAt(0));
+
+      addFiles([
+        mkFile("apple.ogg", fakeOgg, "audio/ogg"),
+        mkFile("apple.png", tinyPng, "image/png"),
+        mkFile("citrus.ogg", fakeOgg, "audio/ogg"),
+        mkFile("citrus.png", tinyPng, "image/png"),
+        mkFile("lonely.png", tinyPng, "image/png"),
+        mkFile("readme.txt", new TextEncoder().encode("hello"), "text/plain"),
+      ]);
+
+      toast("good","Demo loaded","Replace demo files with real .ogg + textures when ready.", 7000);
+    });
+
+    // Settings updates refresh output name
+    [modIdEl, modVersionEl].forEach(n=> n.addEventListener("input", ()=>{
+      const modId = sanitizeModId(modIdEl.value) || "disc_mod";
+      if (modIdEl.value !== modId) modIdEl.value = modIdEl.value; // keep user input; we’ll sanitize on generate
+      outName.textContent = `${sanitizeModId(modIdEl.value)||"disc_mod"}-${(modVersionEl.value||"1.0.0").trim()||"1.0.0"}.jar`;
+    }));
+
+    $("#btnCopyPlan").addEventListener("click", async ()=>{
+      const modId = sanitizeModId(modIdEl.value) || "disc_mod";
+      const ns = sanitizeModId(namespaceEl.value) || modId;
+      const notes =
+`DiscForge build notes
+
+What this generator outputs:
+- A .jar-shaped zip with:
+  - assets/${ns}/sounds/*.ogg
+  - assets/${ns}/textures/item/*.png (or original ext)
+  - assets/${ns}/models/item/*.json
+  - assets/${ns}/sounds.json
+  - pack.mcmeta
+
+To make it a true Fabric/Forge mod:
+- Create a Fabric/Forge project template.
+- Copy the generated assets into src/main/resources/.
+- Implement item + sound registration in code (MusicDiscItem) and map items to sound events.
+- Ensure sound events exist and comparator output is set per disc.
+
+Pairing rules:
+- base name match: apple.ogg + apple.png -> item "music_disc_apple"
+- missing pairs are skipped.`;
+      try{
+        await navigator.clipboard.writeText(notes);
+        toast("good","Copied","Build notes copied to clipboard.");
+      }catch{
+        toast("warn","Clipboard blocked","Couldn’t copy. Your browser may block clipboard access on file:// pages.", 7000);
+      }
+    });
+
+    $("#btnPreview").addEventListener("click", ()=>{
+      const plan = buildWritePlan();
+      if (!plan.ok){
+        toast("warn","Preview unavailable", plan.reason);
+        return;
+      }
+      const lines = [];
+      lines.push(`Preview: files to be written (${plan.entries.length})`);
+      for (const e of plan.entries.slice(0, 80)){
+        lines.push(`- ${e.path}${e.kind==="file" ? ` (${e.note||"binary"})` : ""}`);
+      }
+      if (plan.entries.length > 80) lines.push(`… and ${plan.entries.length-80} more`);
+      logEl.textContent = lines.join("\n");
+      toast("good","Preview ready","See the log for the output file list.", 4500);
+    });
+
+    // ---------- ZIP writer (store-only) ----------
+    // Minimal ZIP builder (no compression). Good enough for a .jar-shaped zip download.
+    function crc32(buf){
+      let c = ~0;
+      for (let i=0;i<buf.length;i++){
+        c ^= buf[i];
+        for (let k=0;k<8;k++){
+          c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
         }
-        table[i] = c >>> 0;
       }
-      return table;
-    })();
+      return ~c >>> 0;
+    }
+    function u16(n){ return new Uint8Array([n & 255, (n>>>8) & 255]); }
+    function u32(n){ return new Uint8Array([n & 255, (n>>>8)&255, (n>>>16)&255, (n>>>24)&255]); }
+    function strBytes(s){ return new TextEncoder().encode(s); }
 
-    function encodeUTF8(str) {
-      return new TextEncoder().encode(str);
-    }
-    function dosTimeDate(date = new Date()) {
-      let time = 0,
-        d = 0;
-      let sec = Math.floor(date.getSeconds() / 2);
-      let min = date.getMinutes();
-      let hour = date.getHours();
-      time = (hour << 11) | (min << 5) | sec;
-      let day = date.getDate();
-      let month = date.getMonth() + 1;
-      let year = date.getFullYear();
-      d = ((year - 1980) << 9) | (month << 5) | day;
-      return { time, date: d };
-    }
-    function u16(n) {
-      const a = new Uint8Array(2);
-      new DataView(a.buffer).setUint16(0, n, true);
-      return a;
-    }
-    function u32(n) {
-      const a = new Uint8Array(4);
-      new DataView(a.buffer).setUint32(0, n, true);
-      return a;
-    }
-
-    async function makeZip(entries) {
-      // entries: {path, data: Uint8Array|ArrayBuffer|string|Blob|File}
-      const files = [];
-      for (const e of entries) {
-        let data;
-        if (typeof e.data === "string") data = encodeUTF8(e.data);
-        else if (e.data instanceof Uint8Array) data = e.data;
-        else if (e.data instanceof ArrayBuffer) data = new Uint8Array(e.data);
-        else if (e.data instanceof Blob) data = new Uint8Array(await e.data.arrayBuffer());
-        else data = encodeUTF8(String(e.data));
-        files.push({ path: e.path.replace(/\\/g, "/"), data });
-      }
-
-      const now = dosTimeDate(new Date());
+    async function buildZip(entries){
+      // entries: [{path, data(Uint8Array), mtime:Date}]
+      const fileRecords = [];
+      const centralRecords = [];
       let offset = 0;
-      const fileParts = [];
-      const centralParts = [];
 
-      for (const f of files) {
-        const nameBytes = encodeUTF8(f.path);
-        const crc = crc32(f.data);
-        const size = f.data.byteLength;
+      const now = new Date();
+      const dosTimeDate = (d)=>{
+        const time = ((d.getHours() & 31) << 11) | ((d.getMinutes() & 63) << 5) | ((Math.floor(d.getSeconds()/2)) & 31);
+        const date = (((d.getFullYear()-1980) & 127) << 9) | (((d.getMonth()+1) & 15) << 5) | ((d.getDate()) & 31);
+        return {time, date};
+      };
+
+      for (const ent of entries){
+        const pathBytes = strBytes(ent.path);
+        const data = ent.data || new Uint8Array();
+        const crc = crc32(data);
+        const {time, date} = dosTimeDate(ent.mtime || now);
 
         // Local file header
         const local = [
           u32(0x04034b50),
-          u16(20), // version needed
-          u16(0), // flags
-          u16(0), // compression = store
-          u16(now.time),
-          u16(now.date),
+          u16(20),          // version needed
+          u16(0),           // flags
+          u16(0),           // compression 0=store
+          u16(time),
+          u16(date),
           u32(crc),
-          u32(size),
-          u32(size),
-          u16(nameBytes.length),
-          u16(0), // extra len
-          nameBytes,
+          u32(data.length),
+          u32(data.length),
+          u16(pathBytes.length),
+          u16(0),           // extra length
+          pathBytes,
+          data
         ];
-        fileParts.push(...local, f.data);
-        const localLen = local.reduce((s, p) => s + (p.byteLength || p.length || 0), 0) + size;
+        const localBlob = concat(local);
+        fileRecords.push(localBlob);
 
         // Central directory header
         const central = [
           u32(0x02014b50),
-          u16(20),
-          u16(20),
+          u16(20), u16(20),
           u16(0),
           u16(0),
-          u16(now.time),
-          u16(now.date),
+          u16(time),
+          u16(date),
           u32(crc),
-          u32(size),
-          u32(size),
-          u16(nameBytes.length),
-          u16(0),
-          u16(0),
-          u16(0),
-          u16(0),
+          u32(data.length),
+          u32(data.length),
+          u16(pathBytes.length),
+          u16(0), u16(0),
+          u16(0), u16(0),
           u32(0),
           u32(offset),
-          nameBytes,
+          pathBytes
         ];
-        centralParts.push(...central);
+        const centralBlob = concat(central);
+        centralRecords.push(centralBlob);
 
-        offset += 30 + nameBytes.length + size; // local header fixed 30 bytes
+        offset += localBlob.length;
       }
 
-      const centralSize = centralParts.reduce((s, p) => s + (p.byteLength || p.length || 0), 0);
-      const centralOffset = offset;
+      const centralStart = offset;
+      const centralDir = concat(centralRecords);
+      offset += centralDir.length;
 
-      const end = [
+      // EOCD
+      const eocd = concat([
         u32(0x06054b50),
-        u16(0),
-        u16(0),
-        u16(files.length),
-        u16(files.length),
-        u32(centralSize),
-        u32(centralOffset),
-        u16(0),
-      ];
+        u16(0), u16(0),
+        u16(entries.length),
+        u16(entries.length),
+        u32(centralDir.length),
+        u32(centralStart),
+        u16(0)
+      ]);
 
-      const blob = new Blob([...fileParts, ...centralParts, ...end], { type: "application/zip" });
-      return blob;
+      const out = concat([...fileRecords, centralDir, eocd]);
+      return out;
     }
 
-    function downloadBlob(blob, filename) {
+    function concat(chunks){
+      const total = chunks.reduce((s,c)=> s + c.length, 0);
+      const out = new Uint8Array(total);
+      let o=0;
+      for (const c of chunks){ out.set(c, o); o += c.length; }
+      return out;
+    }
+
+    // ---------- Generation plan ----------
+    function buildWritePlan(){
+      const m = computeModel();
+      if (!allFiles.length) return {ok:false, reason:"Add files first."};
+      if (!m.ready.length) return {ok:false, reason:"No paired discs. Make sure each base name has .ogg + texture."};
+
+      const modId = sanitizeModId(modIdEl.value) || "disc_mod";
+      const modName = (modNameEl.value || "Disc Mod").trim();
+      const ver = (modVersionEl.value || "1.0.0").trim() || "1.0.0";
+      const mcLabel = (mcVersionEl.value || "").trim();
+      const ns = sanitizeModId(namespaceEl.value) || modId;
+      const packFormat = parseInt(packFormatEl.value, 10) || 15;
+      const comparatorDefault = clamp(parseInt(defaultComparatorEl.value,10) || 1, 0, 15);
+      const rarity = (itemRarityEl.value || "uncommon").trim();
+      const desc = (descEl.value || "").trim();
+
+      // Build sounds.json mapping: "music_disc_<base>": {"sounds":[{"name":"<ns>:music/<base>","stream":true}]}
+      const soundsJson = {};
+      const entries = [];
+
+      // pack.mcmeta (resource-ish)
+      const packMcmeta = {
+        pack: {
+          pack_format: packFormat,
+          description: desc || `${modName}${mcLabel ? ` (MC ${mcLabel})` : ""}`
+        }
+      };
+
+      // Minimal manifest so it "looks like" a jar; actual mod loaders require additional metadata.
+      const manifestText =
+`Manifest-Version: 1.0
+Created-By: DiscForge (browser generator)
+`;
+
+      // Add fixed files
+      entries.push({path:"META-INF/MANIFEST.MF", data: strBytes(manifestText), note:"text"});
+      entries.push({path:"pack.mcmeta", data: strBytes(JSON.stringify(packMcmeta, null, 2)), note:"json"});
+
+      // For each disc
+      for (const c of m.ready){
+        const base = c.base; // already lower
+        const itemId = `music_disc_${base}`;
+
+        // Sound file path
+        entries.push({
+          path: `assets/${ns}/sounds/music/${base}.ogg`,
+          data: null, // set later from file
+          note: "ogg"
+        });
+
+        // Texture path (keep original extension, but MC expects png typically)
+        const tExt = ext(c.texture.name);
+        const texPath = `assets/${ns}/textures/item/${itemId}.${tExt}`;
+        entries.push({
+          path: texPath,
+          data: null,
+          note: `image/${tExt}`
+        });
+
+        // Item model json (vanilla-style)
+        const model = {
+          parent: "minecraft:item/generated",
+          textures: {
+            layer0: `${ns}:item/${itemId}`
+          }
+        };
+        entries.push({
+          path: `assets/${ns}/models/item/${itemId}.json`,
+          data: strBytes(JSON.stringify(model, null, 2)),
+          note: "json"
+        });
+
+        // Sounds json entry
+        soundsJson[itemId] = {
+          sounds: [
+            { name: `${ns}:music/${base}`, stream: true }
+          ]
+        };
+
+        // Data placeholders (not a full mod, but useful scaffolding)
+        const placeholder = {
+          discforge: {
+            item_id: `${ns}:${itemId}`,
+            sound_event: `${ns}:${itemId}`,
+            comparator_output: comparatorDefault,
+            rarity
+          }
+        };
+        entries.push({
+          path: `data/${ns}/discforge/${itemId}.json`,
+          data: strBytes(JSON.stringify(placeholder, null, 2)),
+          note: "json"
+        });
+      }
+
+      // sounds.json
+      entries.push({
+        path: `assets/${ns}/sounds.json`,
+        data: strBytes(JSON.stringify(soundsJson, null, 2)),
+        note: "json"
+      });
+
+      // Attach binary file contents
+      const binMap = new Map();
+      for (const c of m.ready){
+        binMap.set(`assets/${ns}/sounds/music/${c.base}.ogg`, c.sound);
+        const itemId = `music_disc_${c.base}`;
+        const tExt = ext(c.texture.name);
+        binMap.set(`assets/${ns}/textures/item/${itemId}.${tExt}`, c.texture);
+      }
+
+      return {ok:true, modId, ver, ns, entries, binMap, ready:m.ready, candidates:m.candidates, comparatorDefault, rarity, desc, modName};
+    }
+
+    async function readFileUint8(file){
+      const ab = await file.arrayBuffer();
+      return new Uint8Array(ab);
+    }
+
+    // ---------- Generate ----------
+    $("#btnGenerate").addEventListener("click", async ()=>{
+      const plan = buildWritePlan();
+      if (!plan.ok){
+        toast("warn","Can’t generate", plan.reason);
+        return;
+      }
+
+      const m = computeModel();
+      if (m.dupNames.length){
+        toast("warn","Duplicates present",
+          "You have duplicate filenames. Generation will proceed, but you should remove duplicates to avoid ambiguity.",
+          8000
+        );
+      }
+
+      // Create concrete entries with binary data
+      setStatus("Generating", "Building jar (zip) in your browser…");
+      logEl.textContent = "Generating…\n";
+
+      const entries = [];
+      let done = 0;
+      const total = plan.entries.length;
+
+      for (const ent of plan.entries){
+        let data = ent.data;
+        if (data == null){
+          const f = plan.binMap.get(ent.path);
+          if (!f){
+            data = strBytes("");
+          } else {
+            data = await readFileUint8(f);
+          }
+        }
+        entries.push({path: ent.path, data, mtime: new Date()});
+        done++;
+        if (done % 6 === 0 || done === total){
+          const pct = Math.round((done/total)*100);
+          progressBar.style.width = `${pct}%`;
+          progressBar.parentElement.setAttribute("aria-valuenow", String(pct));
+          logEl.textContent += `• Added ${ent.path}\n`;
+          await sleep(10);
+        }
+      }
+
+      logEl.textContent += `\nWriting zip structures…\n`;
+      const zipBytes = await buildZip(entries);
+
+      const jarName = `${plan.modId}-${plan.ver}.jar`;
+      const blob = new Blob([zipBytes], {type:"application/java-archive"});
       const url = URL.createObjectURL(blob);
+
       const a = document.createElement("a");
       a.href = url;
-      a.download = filename;
+      a.download = jarName;
       document.body.appendChild(a);
       a.click();
       a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 8000);
-    }
+      setTimeout(()=> URL.revokeObjectURL(url), 2500);
 
-    function validate() {
-      const modid = safeModId(modidEl.value);
-      modidEl.value = modid;
-      const prefix = String(prefixEl.value || "records/").trim();
-      prefixEl.value = prefix.endsWith("/") ? prefix : prefix + "/";
-      if (!state.discs.some((d) => !d.skip)) {
-        logLine(`[err] No valid discs to export. Add audio and textures/models.`, "err");
-        return false;
-      }
-      return true;
-    }
+      toast("good","Download started", `Generated ${jarName} (${prettyBytes(zipBytes.length)}).`, 6500);
+      setStatus("Generated", `${plan.ready.length} disc(s) written · ${jarName}`);
 
-    async function exportZip() {
-      if (!validate()) return;
-      const modid = safeModId(modidEl.value);
-      const prefix = prefixEl.value || "records/";
+      logEl.textContent += `\nDone.\n\nImportant:\nThis .jar is a jar-shaped zip containing assets/data scaffolding.\nTo make it load as a true Fabric/Forge mod, import these resources into a real mod template and register MusicDiscItem + sound events in code.\n`;
+      render(); // restore progress relative to pairs, not generation progress
+    });
 
-      logLine(`[build] Preparing ZIP…`, "muted");
-
-      const entries = [];
-
-      // Assets: sounds.json, lang, item models, textures
-      entries.push({ path: `assets/${modid}/sounds.json`, data: buildSoundsJson(modid) });
-      entries.push({ path: `assets/${modid}/lang/en_us.json`, data: buildLangJson(modid) });
-
-      for (const d of state.discs) {
-        if (d.skip) continue;
-
-        // Item model JSON
-        if (d.jsonFileName) {
-          // Use uploaded JSON file content
-          const jsonFile = state.json.get(d.base);
-          if (jsonFile) {
-            const content = await jsonFile.text();
-            entries.push({ path: `assets/${modid}/models/item/${d.id}.json`, data: content });
-          } else {
-            // Should not happen, but fallback to generated flat model
-            entries.push({
-              path: `assets/${modid}/models/item/${d.id}.json`,
-              data: buildItemModelJson(modid, d),
-            });
-          }
-        } else if (d.pngFileName) {
-          // Generate flat item model JSON referencing png texture
-          entries.push({
-            path: `assets/${modid}/models/item/${d.id}.json`,
-            data: buildItemModelJson(modid, d),
-          });
-        } else {
-          // No png or json: generate flat model with default texture (warned earlier)
-          entries.push({
-            path: `assets/${modid}/models/item/${d.id}.json`,
-            data: buildItemModelJson(modid, d),
-          });
-        }
-
-        // Include audio binary
-        const base = d.base;
-        const oggFile = state.ogg.get(base);
-        if (oggFile) {
-          entries.push({
-            path: `assets/${modid}/sounds/${prefix}${d.id}.ogg`,
-            data: oggFile,
-          });
-        }
-
-        // Include png texture if present
-        if (d.pngFileName) {
-          const pngFile = state.png.get(base);
-          if (pngFile) {
-            entries.push({
-              path: `assets/${modid}/textures/item/${d.id}.png`,
-              data: pngFile,
-            });
-          }
+    // ---------- Intersection reveal ----------
+    const io = new IntersectionObserver((entries)=>{
+      for (const e of entries){
+        if (e.isIntersecting){
+          e.target.style.animationPlayState = "running";
+          io.unobserve(e.target);
         }
       }
-
-      // Stubs + readme
-      entries.push({ path: `README_${modid}.md`, data: buildReadme(modid) });
-      for (const s of buildStubs(modid)) entries.push(s);
-
-      // Quick checklist
-      entries.push({
-        path: `CHECKLIST.txt`,
-        data: `DiscForge checklist
-- [ ] Copy assets/${modid}/ into your mod resources
-- [ ] Register SoundEvents for: ${state.discs
-          .filter((d) => !d.skip)
-          .map((d) => `${modid}:music_disc.${d.id}`)
-          .join(", ")}
-- [ ] Register items for: ${state.discs
-          .filter((d) => !d.skip)
-          .map((d) => `${modid}:${d.id}`)
-          .join(", ")}
-- [ ] Run the game; test: /give @p ${modid}:<disc_id>
-- [ ] Insert into jukebox; confirm playback
-`,
-      });
-
-      const blob = await makeZip(entries);
-      const filename = `${modid}_music_discs_template.zip`;
-      downloadBlob(blob, filename);
-
-      logLine(`[done] Exported ${filename} (${entries.length} files).`, "ok");
-      toast(`Downloaded ${filename}`);
-
-      // Show commands panel with /give commands
-      showCommandsPanel(modid);
-    }
-
-    function showCommandsPanel(modid) {
-      const validDiscs = state.discs.filter((d) => !d.skip);
-      if (!validDiscs.length) {
-        commandsPanel.style.display = "none";
-        commandsText.textContent = "";
-        return;
-      }
-      const commands = validDiscs.map((d) => `/give @p ${modid}:${d.id}`).join("\n");
-      commandsText.textContent = commands;
-      commandsPanel.style.display = "block";
-      commandsPanel.scrollTop = 0;
-    }
-
-    // ---------- Buttons ----------
-    function scrollToGenerator() {
-      $("#generator").scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-    $("#startNow").addEventListener("click", scrollToGenerator);
-    $("#jumpGenerator").addEventListener("click", scrollToGenerator);
-
-    $("#autoName").addEventListener("click", () => {
-      if (!state.discs.length) return;
-      for (const d of state.discs) {
-        d.id = slugify(d.id || d.base);
-      }
-      renderDiscs();
-      logLine(`[normalize] Normalized ${state.discs.length} IDs.`, "ok");
+    }, {threshold: .12});
+    document.querySelectorAll(".reveal").forEach((n)=>{
+      n.style.animationPlayState = "paused";
+      io.observe(n);
     });
 
-    $("#copySoundsJson").addEventListener("click", () => {
-      const modid = safeModId(modidEl.value);
-      copyText(buildSoundsJson(modid));
-      logLine(`[copy] sounds.json copied.`, "ok");
-    });
-
-    $("#previewJson").addEventListener("click", () => {
-      const modid = safeModId(modidEl.value);
-      const preview = [
-        `--- sounds.json ---\n${buildSoundsJson(modid)}`,
-        `--- en_us.json ---\n${buildLangJson(modid)}`,
-      ].join("\n");
-      copyText(preview);
-      logLine(`[preview] Copied sounds.json + en_us.json preview.`, "ok");
-    });
-
-    $("#copyGiveAll").addEventListener("click", () => {
-      const modid = safeModId(modidEl.value);
-      const validDiscs = state.discs.filter((d) => !d.skip);
-      if (!validDiscs.length) {
-        toast("Import valid discs first.");
-        return;
-      }
-      const text = validDiscs.map((d) => `/give @p ${modid}:${d.id}`).join("\n");
-      copyText(text);
-      logLine(`[copy] Copied ${validDiscs.length} /give commands.`, "ok");
-    });
-
-    copyCommandsBtn.addEventListener("click", () => {
-      if (commandsText.textContent.trim().length > 0) {
-        copyText(commandsText.textContent);
-      }
-    });
-
-    $("#exportZip").addEventListener("click", exportZip);
-
-    $("#loadDemo").addEventListener("click", () => {
-      // Demo without external files: create "virtual" discs (no audio binaries),
-      // but still lets users preview output structure & commands.
-      // We won't fake .ogg bytes; we’ll just populate discs list for UI.
-      const demoBases = ["mellow_night", "crimson_arcade", "aquifer_drift", "sunset_raid"];
-      state.ogg.clear();
-      state.png.clear();
-      state.json.clear();
-      for (const b of demoBases) {
-        // Create empty placeholder blobs so ZIP export still contains files (tiny).
-        const oggBlob = new Blob([new Uint8Array([0x4f, 0x67, 0x67, 0x53])], { type: "audio/ogg" }); // "OggS" header bytes
-        const oggFile = new File([oggBlob], `${b}.ogg`, { type: "audio/ogg" });
-        state.ogg.set(b, oggFile);
-
-        // Add png for half of them
-        if (Math.random() > 0.5) {
-          const pngBlob = new Blob([], { type: "image/png" });
-          const pngFile = new File([pngBlob], `${b}.png`, { type: "image/png" });
-          state.png.set(b, pngFile);
-        } else {
-          // Add json for others (without png to avoid error)
-          const jsonBlob = new Blob([`{"parent":"item/generated","textures":{"layer0":"discforge:item/${b}"}}`], {
-            type: "application/json",
-          });
-          const jsonFile = new File([jsonBlob], `${b}.json`, { type: "application/json" });
-          state.json.set(b, jsonFile);
-        }
-      }
-      buildDiscsFromMaps();
-      renderDiscs();
-      logLine(`[demo] Loaded ${state.discs.length} demo discs. Replace with real .ogg/.png/.json when ready.`, "warn");
-      scrollToGenerator();
-    });
-
-    // Keep modid sanitized
-    modidEl.addEventListener("blur", () => {
-      modidEl.value = safeModId(modidEl.value);
-    });
-
-    // Initialize
-    renderDiscs();
+    // Initial render
+    render();
   </script>
 </body>
 </html>
